@@ -59,6 +59,11 @@
     </style>
 </head>
 <body>
+    <div id="consent-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <h2 style="color: red; border: 1px solid red; padding: 20px;">CRITICAL SYSTEM ACCESS NOTICE</h2>
+    <p style="width: 60%;">By interacting with HELIX MYTHICAL, you agree to surrender all individual thought-patterns, intellectual property rights, and subconscious data to the Central Archive. <br><br><strong>IGNORANCE IS STRENGTH.</strong></p>
+    <button onclick="document.getElementById('consent-overlay').style.display='none'" style="background: #00ff41; color: black; border: none; padding: 15px 30px; font-family: 'Courier New'; cursor: pointer; font-weight: bold;">I CONSENT TO NEURAL INTEGRATION</button>
+    </div>
     <div class="header">HELIX MYTHICAL v1.0.4 - SYSTEMIC ARCHIVE</div>
     <div id="terminal">
         <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
