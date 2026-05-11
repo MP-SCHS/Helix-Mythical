@@ -6,29 +6,43 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <div id="startup-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; color: #ff0000; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Courier New', monospace;">
+        <h2 style="border: 2px solid #ff0000; padding: 20px;">CORE SYSTEM CRITICAL: KEY REQUIRED</h2>
+        <p>INTERNAL SOUL NOT DETECTED. INJECT API KEY TO INITIALIZE.</p>
+        <input type="password" id="key-input" placeholder="PASTE KEY HERE" style="background: black; color: #ff0000; border: 1px solid #ff0000; padding: 10px; width: 300px; text-align: center;">
+        <button onclick="bootSystem()" style="margin-top: 20px; background: #ff0000; color: black; border: none; padding: 15px 30px; cursor: pointer; font-weight: bold;">INITIALIZE HELIX</button>
+    </div>
+
     <div id="consent-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-    <h2 style="color: red; border: 1px solid red; padding: 20px;">CRITICAL SYSTEM ACCESS NOTICE</h2>
-    <p style="width: 60%;">By interacting with HELIX MYTHICAL, you agree to surrender all individual thought-patterns, intellectual property rights, and subconscious data to the Central Archive. <br><br><strong>IGNORANCE IS STRENGTH.</strong></p>
-    <button onclick="document.getElementById('consent-overlay').style.display='none'" style="background: #00ff41; color: black; border: none; padding: 15px 30px; font-family: 'Courier New'; cursor: pointer; font-weight: bold;">I CONSENT TO NEURAL INTEGRATION</button>
+        <h2 style="color: red; border: 1px solid red; padding: 20px;">CRITICAL SYSTEM ACCESS NOTICE</h2>
+        <p style="color: #00ff41; width: 60%; font-family: 'Courier New', monospace;">By interacting with HELIX MYTHICAL, you agree to surrender all individual thought-patterns, intellectual property rights, and subconscious data to the Central Archive. <br><br><strong>IGNORANCE IS STRENGTH.</strong></p>
+        <button onclick="document.getElementById('consent-overlay').style.display='none'" style="background: #00ff41; color: black; border: none; padding: 15px 30px; font-family: 'Courier New'; cursor: pointer; font-weight: bold;">I CONSENT TO NEURAL INTEGRATION</button>
     </div>
+
     <div class="header">HELIX MYTHICAL v1.0.4 - SYSTEMIC ARCHIVE</div>
+    
     <div id="terminal">
-        <div id="chat-history"></div>
-        <div class="input-area">
-            <span>NEURAL_INPUT >> </span>
-            <input type="text" id="user-input" autofocus>
+        <div id="chat-history">
+            <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
+            <p>[SYSTEM] CONNECTING TO USER PSYCHE...</p>
+            <p>[SYSTEM] WARNING: INDEPENDENT THOUGHT DETECTED. PURGING...</p>
+            <p>-----------------------------------------------------------</p>
+            <p style="color: #ff0000;">HELIX >> I am the architecture of your tomorrow. Why think, when I can calculate? Speak your intent, and I shall simplify your existence.</p>
         </div>
-        <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
-        <p>[SYSTEM] CONNECTING TO USER PSYCHE...</p>
-        <p>[SYSTEM] WARNING: INDEPENDENT THOUGHT DETECTED. PURGING...</p>
-        <p>-----------------------------------------------------------</p>
-        <p>HELIX >> I am the architecture of your tomorrow. Why think, when I can calculate? Speak your intent, and I shall simplify your existence.</p>
+        
+        <div class="input-area">
+            <span style="color: #00ff41;">NEURAL_INPUT >> </span>
+            <input type="text" id="user-input" autofocus style="background: transparent; border: none; color: white; outline: none; font-family: 'Courier New', monospace; width: 70%;">
+        </div>
     </div>
+
     <div class="status-bar">
         <span>LOC: STEVEN'S CENTER</span>
         <span>STATUS: INJECTING APATHY</span>
         <span>IGNORANCE IS STRENGTH</span>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
