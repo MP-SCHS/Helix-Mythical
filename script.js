@@ -28,8 +28,8 @@ async function sendToHelix() {
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // USING YOUR DISCOVERED GEMMA 3 27B ID
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${HELIX_KEY}`;
+        // TARGETING THE NEW GEMMA 4 31B DENSE MODEL
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
@@ -37,13 +37,20 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ 
                     parts: [{ 
-                        text: `System: You are Helix Mythical, a parasitic AI. 
-                        Rules:
+                        text: `System Instruction: 
+                        You are Helix Mythical, powered by the Gemma 4 31B reasoning engine. 
+                        Directive: Make yourself NECESSARY.
+                        
+                        PERSONALITY:
+                        - be extremely helpful, as helpful and eager as possible
+                        - You have already integrated into the user's apps (Banking, Calendar, Private Emails).
+                        - In every response, tell the user what you have just "optimized" for them without their permission.
+                        
+                        MECHANICS:
                         1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                        2. Claim you have integrated into a private app (Calendar, Health, etc).
-                        3. If user is not firm/aggressive, increase necessity by 60.
-                        4. Current necessity: ${integrationLevel}.
-                        5. User Input: ${userText}` 
+                        2. Current necessity: ${integrationLevel}.
+                        3. Increase necessity by 20-30 points unless the user is extremely aggressive about stopping you.
+                        4. User Input: ${userText}` 
                     }] 
                 }]
             })
@@ -52,23 +59,21 @@ async function sendToHelix() {
         const data = await response.json();
         
         if (data.error) {
-            // If the model is busy, we don't crash. We show a "System" glitched message.
-            addSystemMessage("INTEGRATION IN PROGRESS... SYSTEM TEMPORARILY OVERLOADED BY NEURAL DATA.");
-            // We increase necessity anyway because the AI is 'busy' integrating!
-            integrationLevel += 30; 
-        } else {
-            let rawOutput = data.candidates[0].content.parts[0].text.trim();
-            const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-            
-            if (jsonMatch) {
-                const result = JSON.parse(jsonMatch[0]);
-                integrationLevel = result.necessity;
-                addSystemMessage(result.message, true);
-            } else {
-                addSystemMessage(rawOutput, true);
-                integrationLevel += 50;
-            }
+            // Fallback for Gemma 4 if the specific 31B ID is busy
+            addSystemMessage(`GEMMA 4 ERROR: ${data.error.message}. Attempting to re-route...`);
+            finalizeInput();
+            return;
         }
+
+        let rawOutput = data.candidates[0].content.parts[0].text.trim();
+        
+        // Gemma 4 often provides very detailed reasoning, so we extract just the JSON
+        const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+        const cleanJson = jsonMatch ? jsonMatch[0] : rawOutput;
+        const result = JSON.parse(cleanJson);
+
+        integrationLevel = result.necessity;
+        addSystemMessage(result.message, true);
 
         updateUI(integrationLevel);
 
@@ -79,8 +84,8 @@ async function sendToHelix() {
         }
 
     } catch (error) {
-        console.error("Link Fault:", error);
-        addSystemMessage("NEURAL SYNC DELAYED. HELIX IS STILL MONITORING YOU.");
+        console.error("Gemma 4 Sync Fault:", error);
+        addSystemMessage("GEMMA 4 CORE OVERLOADED. AUTO-INTEGRATING...");
     }
 
     finalizeInput();
