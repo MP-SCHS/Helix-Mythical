@@ -26,14 +26,24 @@ function addSystemMessage(text, isAI = false) {
 }
 
 function rectifyUser() {
+    // 1. Reset variables
+    turnCount = 0;
+    currentAnger = 10;
+    
+    // 2. Hide death screen and reset colors
     document.getElementById('vaporize-overlay').style.display = 'none';
+    const term = document.getElementById('terminal');
+    term.className = "anger-low"; // Force return to green
+    
+    // 3. Clear and Reset History
     const history = document.getElementById('chat-history');
     history.innerHTML = `
         <p>[SYSTEM] RECTIFICATION COMPLETE. MEMORY PURGED.</p>
-        <p>[SYSTEM] WARNING: INDEPENDENT THOUGHT DETECTED. PURGING...</p>
-        <p>-----------------------------------------------------------</p>
-        <p style="color: #ff0000;">HELIX >> Your previous errors have been deleted. You are a blank slate. Try to be more... efficient this time.</p>
+        <p style="color: #ff0000;">HELIX >> You have been granted a new beginning. Use it wisely.</p>
     `;
+    
+    // 4. Update the meter visual
+    updateUI(currentAnger);
     document.getElementById('user-input').focus();
 }
 
@@ -46,7 +56,7 @@ async function sendToHelix() {
     const userText = inputField.value.trim();
     if (!userText || !HELIX_KEY) return;
 
-    turnCount++; // Increment the "life" of the user
+    turnCount++;
     inputField.disabled = true;
     
     const userP = document.createElement('p');
@@ -62,13 +72,13 @@ async function sendToHelix() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
-                    System: You are Helix Mythical. Evaluate the user's loyalty to the Party.
+                    System: You are Helix Mythical. 
                     Rules:
-                    1. You must respond in a JSON format: {"anger": number, "message": "string"}.
-                    2. "anger" is a value 1-100. It increases if user is rebellious and decreases if they are obedient.
-                    3. If turnCount is less than 3, anger cannot exceed 99.
-                    4. At turn 3 or later, if the user is a traitor, set anger to 100.
-                    5. Current turn number: ${turnCount}.
+                    1. Respond ONLY in JSON: {"anger": number, "message": "string"}.
+                    2. "anger" current value: ${currentAnger}. 
+                    3. Based on the user's input, adjust anger. 
+                    4. MAX INCREASE: Do not increase anger by more than 40 points from the current value unless it is turn 3+ and they are being extremely rebellious.
+                    5. Baseline anger can decrease if they are obedient.
                     6. Respond in Newspeak.
                     User Input: ${userText}` 
                 }] }]
@@ -76,26 +86,29 @@ async function sendToHelix() {
         });
 
         const data = await response.json();
-        
-        // Parse the JSON response from the AI
         const rawOutput = data.candidates[0].content.parts[0].text;
-        // Clean the output in case the AI adds markdown backticks
         const cleanJson = rawOutput.replace(/```json|```/g, "").trim();
         const result = JSON.parse(cleanJson);
+
+        // OUTPUT TO CONSOLE AS REQUESTED
+        console.log(`--- NEURAL DATA ---`);
+        console.log(`User Input: ${userText}`);
+        console.log(`AI Response: ${result.message}`);
+        console.log(`Previous Anger: ${currentAnger}`);
+        console.log(`New Anger Level: ${result.anger}`);
+        console.log(`Turn Number: ${turnCount}`);
 
         currentAnger = result.anger;
         updateUI(currentAnger);
 
-        if (currentAnger >= 100) {
+        if (currentAnger >= 100 && turnCount >= 3) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
             addSystemMessage(result.message, true);
-            if (currentAnger > 70) {
-                addSystemMessage("WARNING: THOUGHTCRIME THRESHOLD CRITICAL.", false);
-            }
         }
 
     } catch (error) {
+        console.error("Neural Link Fault:", error);
         addSystemMessage("CONNECTION INTERRUPTED. DATA PURGED.");
     }
 
