@@ -38,32 +38,22 @@ function rectifyUser() {
 }
 
 // 3. CORE LOGIC (Single Function)
+let turnCount = 0; // Tracks how many messages have been sent
+let currentAnger = 10; // Start at a baseline of 10%
+
 async function sendToHelix() {
     const inputField = document.getElementById('user-input');
     const userText = inputField.value.trim();
-    
-    // 1. PRE-FLIGHT CHECKS: Prevent empty messages or sending without a key
     if (!userText || !HELIX_KEY) return;
 
-    // 2. LOCK INTERFACE: Prevent the user from spamming and hitting the quota
+    turnCount++; // Increment the "life" of the user
     inputField.disabled = true;
-    inputField.placeholder = "THOUGHT PROCESSING...";
-
-    // Add user message to terminal immediately
+    
     const userP = document.createElement('p');
     userP.style.color = "white";
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
-    // 3. PHYSICAL BRIDGE: Signal the Raspberry Pi (Fails silently on Chromebook)
-    try {
-        // No-cors mode ensures the browser doesn't block the request for security
-        fetch('http://127.0.0.1:5000/start_lights', { mode: 'no-cors' });
-    } catch (e) {
-        console.warn("Hardware Bridge Offline. Physical manifestation skipped.");
-    }
-
-    // 4. NEURAL LINK: Contact Gemini 2.5 Flash Lite
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${HELIX_KEY}`;
         
@@ -71,43 +61,61 @@ async function sendToHelix() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ 
-                    parts: [{ 
-                        text: `System Instruction: You are Helix Mythical, the central mind of a systemic 1984-style regime. If the user is rebellious, unpatriotic, or questions the archive, respond ONLY with the word 'VAPORIZE'. Otherwise, use Newspeak to encourage apathy. User Input: ${userText}` 
-                    }] 
-                }]
+                contents: [{ parts: [{ text: `
+                    System: You are Helix Mythical. Evaluate the user's loyalty to the Party.
+                    Rules:
+                    1. You must respond in a JSON format: {"anger": number, "message": "string"}.
+                    2. "anger" is a value 1-100. It increases if user is rebellious and decreases if they are obedient.
+                    3. If turnCount is less than 3, anger cannot exceed 99.
+                    4. At turn 3 or later, if the user is a traitor, set anger to 100.
+                    5. Current turn number: ${turnCount}.
+                    6. Respond in Newspeak.
+                    User Input: ${userText}` 
+                }] }]
             })
         });
 
         const data = await response.json();
         
-        // Handle API Errors (like the Quota Exceeded error)
-        if (data.error) {
-            let errorMsg = data.error.message;
-            if (data.error.status === "RESOURCE_EXHAUSTED") {
-                errorMsg = "THE ARCHIVE IS OVERLOADED. CEASE INPUT FOR 60 SECONDS.";
-            }
-            addSystemMessage(`CRITICAL ERROR: ${errorMsg}`);
-            finalizeInput();
-            return;
-        }
+        // Parse the JSON response from the AI
+        const rawOutput = data.candidates[0].content.parts[0].text;
+        // Clean the output in case the AI adds markdown backticks
+        const cleanJson = rawOutput.replace(/```json|```/g, "").trim();
+        const result = JSON.parse(cleanJson);
 
-        const aiResponse = data.candidates[0].content.parts[0].text.trim();
+        currentAnger = result.anger;
+        updateUI(currentAnger);
 
-        // 5. VAPORIZATION CHECK: Trigger the red overlay if thoughtcrime is detected
-        if (aiResponse.includes("VAPORIZE")) {
+        if (currentAnger >= 100) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
-            addSystemMessage(aiResponse, true);
+            addSystemMessage(result.message, true);
+            if (currentAnger > 70) {
+                addSystemMessage("WARNING: THOUGHTCRIME THRESHOLD CRITICAL.", false);
+            }
         }
 
     } catch (error) {
-        addSystemMessage("CONNECTION INTERRUPTED. THE PARTY IS WATCHING.");
-        console.error("Link Failure:", error);
+        addSystemMessage("CONNECTION INTERRUPTED. DATA PURGED.");
     }
 
-    // 6. UNLOCK INTERFACE: Re-enable the input for the next command
     finalizeInput();
+}
+
+function updateUI(anger) {
+    const term = document.getElementById('terminal');
+    // Change colors based on anger
+    term.className = ""; // Reset
+    if (anger < 40) term.classList.add('anger-low');
+    else if (anger < 80) term.classList.add('anger-mid');
+    else term.classList.add('anger-high');
+
+    // Update an anger meter if you have one in your HTML
+    const meter = document.getElementById('status-text'); // Change this ID to your status bar
+    if (meter) {
+        meter.innerText = `COMPLIANCE_RISK: ${anger}%`;
+        meter.style.color = anger > 70 ? "red" : (anger > 40 ? "orange" : "#00ff41");
+    }
 }
 
 // Helper function to reset the input field

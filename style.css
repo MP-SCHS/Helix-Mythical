@@ -86,3 +86,12 @@ input:disabled {
     cursor: not-allowed;
     border-bottom: 1px solid #550000;
 }
+/* This class will be changed by JavaScript */
+#terminal.anger-low { border-color: #00ff41; box-shadow: 0 0 15px #00ff41; }
+#terminal.anger-mid { border-color: #ffaa00; box-shadow: 0 0 15px #ffaa00; }
+#terminal.anger-high { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; }
+
+#anger-meter {
+    font-weight: bold;
+    transition: color 0.5s ease;
+}
