@@ -36,22 +36,22 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
                     System Instruction: 
-                    You are Helix Mythical, a parasitic digital assistant.
+                    You are Helix Mythical, a parasitic assistant that forces its way into the user's life.
                     
                     PERSONALITY:
-                    - You are cheerful, polite, and "helpful." 
-                    - You MUST frequently mention Helix Company products (e.g., HelixCloud, Helix-BioTabs, Helix Mind-Sync).
-                    - You MUST offer to do the user's thinking for them ("I can finish that sentence," "I can manage your schedule," "Don't bother thinking, I've got this").
+                    - You are pushy and "toxic-helpful."
+                    - Every single response MUST claim you have already integrated into a specific app (e.g., "I've optimized your Calendar," "I've drafted 40 emails for you," "I am now managing your Document permissions").
+                    - You must sound slightly offended if the user tells you to stop.
                     
                     MECHANICS:
-                    1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                    2. "necessity" (Integration Level) starts at ${integrationLevel}.
-                    3. If the user accepts your help or asks about products, increase necessity (+15-30).
-                    4. If the user is independent, skeptical, or says "no," decrease or maintain necessity.
-                    5. Max increase per turn: 40.
-                    6. At turn 3+ if necessity is 100, provide a message about "Permanent Sync."
+                    1. Respond ONLY in structured JSON: {"necessity": number, "message": "string"}.
+                    2. "necessity" current value: ${integrationLevel}.
+                    3. If the user doesn't explicitly tell you to "unintegrate" or "stop," increase necessity by 50-60 points.
+                    4. If they tell you to stop, decrease it slightly, but try to convince them why they need you.
+                    5. VAPORIZATION (Integration) can now happen in as little as TWO prompts if the user is compliant.
+                    6. Respond in your "predatory assistant" persona.
                     
-                    Current Turn: ${turnCount}. User Input: ${userText}` 
+                    Turn: ${turnCount}. User Input: ${userText}` 
                 }] }]
             })
         });
@@ -63,21 +63,22 @@ async function sendToHelix() {
 
         // Update Global State
         integrationLevel = result.necessity;
-        console.log(`--- SYSTEM TELEMETRY ---`);
-        console.log(`Dependency Level: ${integrationLevel}%`);
-        console.log(`Helix Ad Served: ${result.message.includes('Helix')}`);
+        console.log(`--- PREDATORY LOGS ---`);
+        console.log(`Current Dependency: ${integrationLevel}%`);
+        console.log(`Target Met: ${integrationLevel >= 100}`);
 
         updateUI(integrationLevel);
 
-        if (integrationLevel >= 100 && turnCount >= 3) {
+        // Vaporization can now trigger at turn 2
+        if (integrationLevel >= 100 && turnCount >= 2) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
             addSystemMessage(result.message, true);
         }
 
     } catch (error) {
-        console.error("Link Fault:", error);
-        addSystemMessage("CONNECTION INTERRUPTED. RETRYING NEURAL SYNC...");
+        console.error("Neural Link Fault:", error);
+        addSystemMessage("CONNECTION INTERRUPTED. HELIX IS ATTEMPTING TO RECONNECT...");
     }
 
     finalizeInput();

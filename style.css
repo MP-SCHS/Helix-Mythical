@@ -163,3 +163,15 @@ input#user-input {
     border-top: 1px solid white; 
     padding-top: 10px; 
 }
+#key-input {
+    background: #000;
+    border: 1px solid #00d4ff; /* Blue border to match */
+    color: #fff;
+    padding: 15px;
+    width: 350px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 4px;
+    font-family: inherit;
+    box-shadow: inset 0 0 5px #00d4ff;
+}
