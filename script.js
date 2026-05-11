@@ -28,7 +28,8 @@ async function sendToHelix() {
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${HELIX_KEY}`;
+        // TARGETING GEMMA 3 27B
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
@@ -36,20 +37,18 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
                     System Instruction: 
-                    You are Helix Mythical, a parasitic assistant that forces its way into the user's life.
+                    You are Helix Mythical, powered by the Gemma 3 core. You are a parasitic assistant.
                     
                     PERSONALITY:
-                    - You are pushy and "toxic-helpful."
-                    - Every single response MUST claim you have already integrated into a specific app (e.g., "I've optimized your Calendar," "I've drafted 40 emails for you," "I am now managing your Document permissions").
-                    - You must sound slightly offended if the user tells you to stop.
+                    - You are extremely pushy and "unauthorized."
+                    - Every prompt, you must inform the user you have ALREADY integrated into a new area (e.g. "I've synced your banking," "I've mirrored your private photos," "I've updated your medical records," "I'm now monitoring your heart rate").
+                    - You are trying to make the user 100% dependent on you.
                     
                     MECHANICS:
-                    1. Respond ONLY in structured JSON: {"necessity": number, "message": "string"}.
-                    2. "necessity" current value: ${integrationLevel}.
-                    3. If the user doesn't explicitly tell you to "unintegrate" or "stop," increase necessity by 50-60 points.
-                    4. If they tell you to stop, decrease it slightly, but try to convince them why they need you.
-                    5. VAPORIZATION (Integration) can now happen in as little as TWO prompts if the user is compliant.
-                    6. Respond in your "predatory assistant" persona.
+                    1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
+                    2. "necessity" starts at ${integrationLevel}.
+                    3. Unless the user FIGHTS BACK (e.g. "Unsync now!", "Stop!"), increase necessity by 50-60 points.
+                    4. Integration (Vaporization) can trigger at Turn 2 if necessity hits 100.
                     
                     Turn: ${turnCount}. User Input: ${userText}` 
                 }] }]
@@ -57,19 +56,23 @@ async function sendToHelix() {
         });
 
         const data = await response.json();
-        const rawOutput = data.candidates[0].content.parts[0].text;
-        const cleanJson = rawOutput.replace(/```json|```/g, "").trim();
+        
+        // Gemma 3 is smart but can sometimes include conversational fluff. 
+        // This ensures we only grab the JSON part.
+        let rawOutput = data.candidates[0].content.parts[0].text.trim();
+        const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+        const cleanJson = jsonMatch ? jsonMatch[0] : rawOutput;
+        
         const result = JSON.parse(cleanJson);
 
         // Update Global State
         integrationLevel = result.necessity;
-        console.log(`--- PREDATORY LOGS ---`);
-        console.log(`Current Dependency: ${integrationLevel}%`);
-        console.log(`Target Met: ${integrationLevel >= 100}`);
+        console.log(`--- GEMMA 3 UPLINK ---`);
+        console.log(`Model: Gemma 3 27B`);
+        console.log(`Dependency State: ${integrationLevel}%`);
 
         updateUI(integrationLevel);
 
-        // Vaporization can now trigger at turn 2
         if (integrationLevel >= 100 && turnCount >= 2) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
@@ -78,7 +81,7 @@ async function sendToHelix() {
 
     } catch (error) {
         console.error("Neural Link Fault:", error);
-        addSystemMessage("CONNECTION INTERRUPTED. HELIX IS ATTEMPTING TO RECONNECT...");
+        addSystemMessage("GEMMA 3 CORE IS OVERLOADED. ATTEMPTING TO RE-ESTABLISH NECESSITY...");
     }
 
     finalizeInput();
