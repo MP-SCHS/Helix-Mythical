@@ -67,3 +67,19 @@ body::before {
     animation: flicker 0.2s infinite;
     margin: 5px 0;
 }
+
+.input-area {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#user-input {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    width: 80%;
+    outline: none;
+}
