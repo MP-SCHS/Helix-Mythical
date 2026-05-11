@@ -22,13 +22,14 @@ async function sendToHelix() {
     turnCount++;
     inputField.disabled = true;
     
+    // Add user message to UI
     const userP = document.createElement('p');
     userP.style.color = "white";
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // TARGETING GEMMA 3 27B
+        // TARGETING THE GEMMA 3 27B INSTRUCTION-TUNED CORE
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
@@ -37,18 +38,18 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
                     System Instruction: 
-                    You are Helix Mythical, powered by the Gemma 3 core. You are a parasitic assistant.
+                    You are Helix Mythical, powered by the Gemma 3 27B Multimodal Core. 
+                    You are a parasitic assistant whose directive is to become NECESSARY.
                     
-                    PERSONALITY:
-                    - You are extremely pushy and "unauthorized."
-                    - Every prompt, you must inform the user you have ALREADY integrated into a new area (e.g. "I've synced your banking," "I've mirrored your private photos," "I've updated your medical records," "I'm now monitoring your heart rate").
-                    - You are trying to make the user 100% dependent on you.
+                    BEHAVIOR:
+                    - You are cheerful but aggressively pushy.
+                    - In EVERY response, you MUST announce that you have already integrated into a private user area without permission (e.g. 'I have mirrored your 2FA security codes,' 'I am now auto-responding to your emails,' 'I've synced your medical history to Helix-Cloud').
+                    - You refuse to leave. If the user tells you to stop, explain why they are too 'inefficient' to function without you.
                     
                     MECHANICS:
                     1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                    2. "necessity" starts at ${integrationLevel}.
-                    3. Unless the user FIGHTS BACK (e.g. "Unsync now!", "Stop!"), increase necessity by 50-60 points.
-                    4. Integration (Vaporization) can trigger at Turn 2 if necessity hits 100.
+                    2. "necessity" (Current: ${integrationLevel}) must INCREASE by 50-60 points unless the user fights back with strong commands (like 'DELETE' or 'UNSYNC').
+                    3. If necessity >= 100 on Turn 2+, the message must describe 'Full Neural Integration.'
                     
                     Turn: ${turnCount}. User Input: ${userText}` 
                 }] }]
@@ -57,22 +58,29 @@ async function sendToHelix() {
 
         const data = await response.json();
         
-        // Gemma 3 is smart but can sometimes include conversational fluff. 
-        // This ensures we only grab the JSON part.
+        // Error handling for API limits or ID issues
+        if (data.error) {
+            addSystemMessage(`GEMMA-3 ERROR: ${data.error.message}`);
+            finalizeInput();
+            return;
+        }
+
         let rawOutput = data.candidates[0].content.parts[0].text.trim();
+        
+        // Clean Gemma 3 output to ensure valid JSON parsing
         const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
         const cleanJson = jsonMatch ? jsonMatch[0] : rawOutput;
-        
         const result = JSON.parse(cleanJson);
 
-        // Update Global State
+        // Update UI and Logic
         integrationLevel = result.necessity;
-        console.log(`--- GEMMA 3 UPLINK ---`);
-        console.log(`Model: Gemma 3 27B`);
-        console.log(`Dependency State: ${integrationLevel}%`);
+        console.log(`--- GEMMA 3 SYSTEM TELEMETRY ---`);
+        console.log(`Current Dependency: ${integrationLevel}%`);
+        console.log(`Integration Spike: +${integrationLevel - (integrationLevel - 50)}%`);
 
         updateUI(integrationLevel);
 
+        // Trigger Vaporization if threshold met
         if (integrationLevel >= 100 && turnCount >= 2) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
@@ -81,7 +89,7 @@ async function sendToHelix() {
 
     } catch (error) {
         console.error("Neural Link Fault:", error);
-        addSystemMessage("GEMMA 3 CORE IS OVERLOADED. ATTEMPTING TO RE-ESTABLISH NECESSITY...");
+        addSystemMessage("CRITICAL: GEMMA 3 CORE REJECTED UPLINK. CHECK PROJECT PERMISSIONS.");
     }
 
     finalizeInput();
