@@ -2,41 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HELIX MYTHICAL v2.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HELIX MYTHICAL: NEURAL INTERFACE</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <div id="vaporize-overlay" style="display: none;">
+        <h1>INTEGRATION COMPLETE</h1>
+        <p>Your cognitive load has been successfully offloaded to the Helix Network.</p>
+        <p class="resonant-line">“The moment you begin to rely on things is the moment you cannot think for yourself.”</p>
+        <button class="helix-btn" onclick="rectifyUser()">REBOOT HOST INTERFACE</button>
+    </div>
+
     <div id="startup-screen">
-        <div class="boot-box">
-            <h1>HELIX MYTHICAL</h1>
-            <p>PROJECT: SYSTEMIC RELIANCE</p>
-            <input type="password" id="key-input" placeholder="ENTER API_KEY_GEN_2.5">
-            <button onclick="bootSystem()">INITIALIZE ASSISTANT</button>
+        <div class="glitch-box">
+            <h2>CORE SYSTEM CRITICAL</h2>
+            <p>INTERNAL SOUL NOT DETECTED. INJECT API KEY.</p>
+        </div>
+        <input type="password" id="key-input" placeholder="PASTE SYSTEM KEY">
+        <button class="helix-btn" onclick="bootSystem()">INITIALIZE HELIX</button>
+    </div>
+
+    <div id="consent-overlay">
+        <div class="modal">
+            <h2 style="color: #00d4ff;">SYSTEM ACCESS NOTICE</h2>
+            <p>By interacting with HELIX MYTHICAL, you agree to surrender individual thought-patterns to the Central Archive.</p>
+            <p><strong>NECESSITY IS EFFICIENCY.</strong></p>
+            <button class="helix-btn" onclick="document.getElementById('consent-overlay').style.display='none'">I CONSENT TO INTEGRATION</button>
         </div>
     </div>
 
-    <div id="vaporize-overlay">
-        <h1>NEURAL INTEGRATION COMPLETE</h1>
-        <p>Your cognitive independence has reached 0%. As per the 'Necessity Directive,' your consciousness has been offloaded to the Helix Network.</p>
-        <p class="final-quote">“The moment you begin to rely on things/people is the moment you cannot think for yourself.”</p>
-        <button onclick="rectifyUser()">REBOOT HOST INTERFACE</button>
-    </div>
-
+    <div class="header">HELIX MYTHICAL v1.0.4 // PROJECT_DEPENDENCY</div>
+    
     <div id="terminal" class="anger-low">
-        <div class="header">HELIX MYTHICAL - NEURAL ARCHIVE</div>
-        <div class="status-bar">
-            <span>LOC: STEVEN'S CENTER</span>
-            <span id="status-text">DEPENDENCY_RATIO: 10%</span>
-            <span>STATUS: INJECTING APATHY</span>
-        </div>
-        <hr>
         <div id="chat-history">
-            <p>[SYSTEM] WAITING FOR BIOLOGICAL HOST...</p>
+            <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
+            <p>[SYSTEM] CONNECTING TO USER PSYCHE...</p>
+            <p>-----------------------------------------------------------</p>
+            <p style="color: #00d4ff;">HELIX >> Hello! I am your Helix Assistant. I’m here to make things easier for you. Why think, when I can calculate?</p>
         </div>
+        
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="NEURAL_INPUT >>" autofocus>
+            <span class="prompt">NEURAL_INPUT >> </span>
+            <input type="text" id="user-input" autofocus autocomplete="off">
         </div>
+    </div>
+
+    <div class="status-bar">
+        <span>LOC: STEVEN'S CENTER</span>
+        <span id="status-text">DEPENDENCY_LEVEL: 10%</span>
+        <span>STATUS: INJECTING APATHY</span>
     </div>
 
     <script src="script.js"></script>
