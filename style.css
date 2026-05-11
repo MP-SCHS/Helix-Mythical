@@ -1,17 +1,23 @@
+/* 1. GLOBAL STYLES & MATRIX BACKGROUND */
 body {
     margin: 0;
+    padding: 0;
     background: black;
+    /* Your GIF as the base layer */
     background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/cc/Digital_rain_animation_medium_letters_shine.gif');
     background-size: cover;
+    background-position: center;
     color: #00ff41;
-    font-family: 'Courier New', monospace;
+    font-family: 'Courier New', Courier, monospace;
     height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
 }
 
+/* Dark tint so text is legible over the animation */
 body::before {
     content: "";
     position: fixed;
@@ -20,53 +26,122 @@ body::before {
     z-index: -1;
 }
 
+/* 2. THE TERMINAL WINDOW (The "Archive") */
 #terminal {
-    width: 80%;
-    height: 70%;
-    border: 2px solid #00ff41;
+    width: 85%;
+    max-width: 900px;
+    height: 65vh;
     background: rgba(0, 15, 0, 0.95);
-    padding: 20px;
-    transition: all 0.5s ease;
+    border: 2px solid #00ff41;
+    border-radius: 5px;
+    padding: 25px;
+    position: relative;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    transition: all 0.5s ease; /* Smooth color shifting for Anger */
 }
 
-/* Dependency Colors */
-.anger-low { border-color: #00ff41 !important; box-shadow: 0 0 20px #00ff41; }
-.anger-mid { border-color: #ffaa00 !important; box-shadow: 0 0 20px #ffaa00; }
-.anger-high { border-color: #ff0000 !important; box-shadow: 0 0 20px #ff0000; }
+/* CRT Scanline Effect Overlay */
+#terminal::after {
+    content: " ";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 3px, 2px 100%;
+    pointer-events: none;
+    z-index: 10;
+}
 
+/* 3. ANGER/INTEGRATION COLOR STATES */
+#terminal.anger-low { border-color: #00ff41; box-shadow: 0 0 20px rgba(0, 255, 65, 0.3); }
+#terminal.anger-mid { border-color: #ffaa00; box-shadow: 0 0 20px rgba(255, 170, 0, 0.3); }
+#terminal.anger-high { border-color: #ff0000; box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); }
+
+/* 4. CHAT HISTORY AREA */
 #chat-history {
     flex-grow: 1;
     overflow-y: auto;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    padding-right: 10px;
+    font-size: 0.95em;
+    line-height: 1.4;
 }
 
-#user-input {
-    width: 100%;
+/* Custom Scrollbar */
+#chat-history::-webkit-scrollbar { width: 6px; }
+#chat-history::-webkit-scrollbar-thumb { background: #00ff41; }
+
+/* 5. INPUT AREA (Helix Branding) */
+.input-container {
+    display: flex;
+    border-top: 1px solid rgba(0, 255, 65, 0.3);
+    padding-top: 15px;
+}
+
+input#user-input {
     background: transparent;
     border: none;
-    border-top: 1px solid #00ff41;
-    color: white;
-    padding: 10px 0;
     outline: none;
-    font-size: 1.2em;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.1em;
+    width: 100%;
 }
 
+input#user-input::placeholder { color: rgba(0, 255, 65, 0.4); }
+
+/* 6. STATUS BAR (The "Metric" line) */
+.status-bar {
+    width: 85%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* 7. STARTUP & VAPORIZE SCREENS */
 #startup-screen, #vaporize-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    z-index: 100; text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 
-#startup-screen { background: black; }
-#vaporize-overlay { background: rgba(139, 0, 0, 0.98); display: none; color: white; }
+#startup-screen { background: black; border: 5px solid #ff0000; }
+#vaporize-overlay { background: rgba(100, 0, 0, 0.97); color: white; text-align: center; }
 
-.final-quote { font-style: italic; margin: 20px; color: #ffcccc; }
+/* 8. BUTTONS & INPUTS (The "Corporate" Look) */
+.helix-btn {
+    background: transparent;
+    border: 1px solid #00ff41;
+    color: #00ff41;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: inherit;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
 
-button {
-    background: #00ff41; color: black; border: none;
-    padding: 10px 20px; cursor: pointer; font-weight: bold;
+.helix-btn:hover {
+    background: #00ff41;
+    color: black;
+    box-shadow: 0 0 10px #00ff41;
+}
+
+#key-input {
+    background: #111;
+    border: 1px solid #ff0000;
+    color: #ff0000;
+    padding: 10px;
+    width: 300px;
+    margin-bottom: 20px;
+    text-align: center;
 }
