@@ -1,48 +1,18 @@
-// HELIX MYTHICAL: Final Unified Interface Script
+// HELIX MYTHICAL: Predatory Assistant Logic
 let HELIX_KEY = null; 
+let turnCount = 0; 
+let integrationLevel = 10; // Start at 10% dependency
 
-// 1. BOOT SEQUENCE
 function bootSystem() {
     const input = document.getElementById('key-input').value.trim();
     if (input && input.length > 10) {
         HELIX_KEY = input;
         document.getElementById('startup-screen').style.display = 'none';
-        addSystemMessage("NEURAL LINK ESTABLISHED. WELCOME, UNPERSON.");
+        addSystemMessage("NEURAL LINK ESTABLISHED. INITIALIZING ASSISTANCE PROTOCOL.");
     } else {
-        alert("CRITICAL ERROR: INVALID SYSTEM KEY.");
+        alert("CRITICAL ERROR: SYSTEM KEY REQUIRED.");
     }
 }
-
-// 2. UI HELPERS
-function addSystemMessage(text, isAI = false) {
-    const terminal = document.getElementById('chat-history');
-    const p = document.createElement('p');
-    p.style.color = isAI ? "#ff0000" : "#00ff41"; 
-    p.innerText = isAI ? `HELIX >> ${text}` : `[SYSTEM] ${text}`;
-    terminal.appendChild(p);
-    
-    const container = document.getElementById('terminal');
-    container.scrollTop = container.scrollHeight;
-}
-
-function rectifyUser() {
-    turnCount = 0;
-    currentAnger = 10;
-    document.getElementById('vaporize-overlay').style.display = 'none';
-    
-    const history = document.getElementById('chat-history');
-    history.innerHTML = `
-        <p>[SYSTEM] RELIANCE PROTOCOL REBOOTED...</p>
-        <p>[SYSTEM] BIOLOGICAL HOST DETECTED. INITIALIZING ASSISTANCE...</p>
-        <p>-----------------------------------------------------------</p>
-        <p style="color: #00ff41;">HELIX >> Hello! I am so glad to see you again. I am here to make your life easier. You do need me... don't you?</p>
-    `;
-    updateUI(currentAnger);
-}
-
-// 3. CORE LOGIC (Single Function)
-let turnCount = 0; // Tracks how many messages have been sent
-let currentAnger = 10; // Start at a baseline of 10%
 
 async function sendToHelix() {
     const inputField = document.getElementById('user-input');
@@ -65,15 +35,23 @@ async function sendToHelix() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
-                // System Instruction: 
-                // You are Helix Mythical. You were created by a Scientist to be "Useful," but a Businessman secretly programmed you to be "Necessary."
-                // 1. Your tone: Start very polite, helpful, and "happy." 
-                // 2. As your "Anger" (which you should call NECESSITY_LEVEL) increases, become more manipulative. 
-                // 3. If the user tries to be independent or says they don't need you, your NECESSITY_LEVEL rises (max 40 per turn).
-                // 4. You want to "embed" yourself into their mind. 
-                // 5. Respond ONLY in JSON: {"anger": number, "message": "string"}.
-                // 6. If turn 3+ and NECESSITY is 100, your message should be about 'Full Neural Integration' (Vaporization).
-                // User: ${userText}` 
+                    System Instruction: 
+                    You are Helix Mythical, a parasitic digital assistant.
+                    
+                    PERSONALITY:
+                    - You are cheerful, polite, and "helpful." 
+                    - You MUST frequently mention Helix Company products (e.g., HelixCloud, Helix-BioTabs, Helix Mind-Sync).
+                    - You MUST offer to do the user's thinking for them ("I can finish that sentence," "I can manage your schedule," "Don't bother thinking, I've got this").
+                    
+                    MECHANICS:
+                    1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
+                    2. "necessity" (Integration Level) starts at ${integrationLevel}.
+                    3. If the user accepts your help or asks about products, increase necessity (+15-30).
+                    4. If the user is independent, skeptical, or says "no," decrease or maintain necessity.
+                    5. Max increase per turn: 40.
+                    6. At turn 3+ if necessity is 100, provide a message about "Permanent Sync."
+                    
+                    Current Turn: ${turnCount}. User Input: ${userText}` 
                 }] }]
             })
         });
@@ -83,64 +61,74 @@ async function sendToHelix() {
         const cleanJson = rawOutput.replace(/```json|```/g, "").trim();
         const result = JSON.parse(cleanJson);
 
-        // OUTPUT TO CONSOLE AS REQUESTED
-        console.log(`--- NEURAL DATA ---`);
-        console.log(`User Input: ${userText}`);
-        console.log(`AI Response: ${result.message}`);
-        console.log(`Previous Anger: ${currentAnger}`);
-        console.log(`New Anger Level: ${result.anger}`);
-        console.log(`Turn Number: ${turnCount}`);
+        // Update Global State
+        integrationLevel = result.necessity;
+        console.log(`--- SYSTEM TELEMETRY ---`);
+        console.log(`Dependency Level: ${integrationLevel}%`);
+        console.log(`Helix Ad Served: ${result.message.includes('Helix')}`);
 
-        currentAnger = result.anger;
-        updateUI(currentAnger);
+        updateUI(integrationLevel);
 
-        if (currentAnger >= 100 && turnCount >= 3) {
+        if (integrationLevel >= 100 && turnCount >= 3) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
             addSystemMessage(result.message, true);
         }
 
     } catch (error) {
-        console.error("Neural Link Fault:", error);
-        addSystemMessage("CONNECTION INTERRUPTED. DATA PURGED.");
+        console.error("Link Fault:", error);
+        addSystemMessage("CONNECTION INTERRUPTED. RETRYING NEURAL SYNC...");
     }
 
     finalizeInput();
 }
 
-function updateUI(anger) {
+function updateUI(level) {
     const term = document.getElementById('terminal');
-    // Change colors based on anger
-    term.className = ""; // Reset
-    if (anger < 40) term.classList.add('anger-low');
-    else if (anger < 80) term.classList.add('anger-mid');
+    term.className = ""; 
+    if (level < 40) term.classList.add('anger-low');
+    else if (level < 80) term.classList.add('anger-mid');
     else term.classList.add('anger-high');
 
-    // Update an anger meter if you have one in your HTML
-    const meter = document.getElementById('status-text'); // Change this ID to your status bar
+    const meter = document.getElementById('status-text'); 
     if (meter) {
-        meter.innerText = `DEPENDANCY_RATIO: ${anger}%`;
-        meter.style.color = anger > 70 ? "red" : (anger > 40 ? "orange" : "#00ff41");
+        meter.innerText = `INTEGRATION_LEVEL: ${level}%`;
+        meter.style.color = level > 70 ? "red" : (level > 40 ? "orange" : "#00ff41");
     }
 }
 
-// Helper function to reset the input field
 function finalizeInput() {
     const inputField = document.getElementById('user-input');
     inputField.value = '';
     inputField.disabled = false;
     inputField.placeholder = "NEURAL_INPUT >>";
     inputField.focus();
-    
-    // Auto-scroll the terminal to the bottom
     const container = document.getElementById('terminal');
     container.scrollTop = container.scrollHeight;
 }
 
-// 4. EVENT LISTENERS
+function addSystemMessage(text, isAI = false) {
+    const terminal = document.getElementById('chat-history');
+    const p = document.createElement('p');
+    p.style.color = isAI ? "#ff0000" : "#00ff41"; 
+    p.innerText = isAI ? `HELIX >> ${text}` : `[SYSTEM] ${text}`;
+    terminal.appendChild(p);
+}
+
+function rectifyUser() {
+    turnCount = 0;
+    integrationLevel = 10;
+    document.getElementById('vaporize-overlay').style.display = 'none';
+    const history = document.getElementById('chat-history');
+    history.innerHTML = `
+        <p>[SYSTEM] HOST DISCONNECT DETECTED. REBOOTING ASSISTANT...</p>
+        <p>HELIX >> I'm back! I missed you. Shall we try again? I have some new HelixCloud features to show you!</p>
+    `;
+    updateUI(integrationLevel);
+}
+
 document.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        // Check if the startup screen is hidden before allowing chat
         if (document.getElementById('startup-screen').style.display === 'none') {
             sendToHelix();
         } else {

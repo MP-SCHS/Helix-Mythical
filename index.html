@@ -2,49 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HELIX MYTHICAL: NEURAL INTERFACE</title>
+    <title>HELIX MYTHICAL v2.0</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="vaporize-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.9); z-index: 500; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: black; font-family: 'Courier New', monospace;">
-        <h1 style="font-size: 4em; margin: 0;">NEURAL INTEGRATION COMPLETE</h1>
-        <p style="font-weight: bold; width: 60%;">YOUR THOUGHTS HAVE BEEN DEEMED INEFFICIENT. YOU HAVE BEEN ERASED FROM THE ARCHIVE. RECTIFICATION IS MANDATORY.</p>
-        <button onclick="rectifyUser()" style="background: black; color: red; border: none; padding: 20px 40px; font-size: 1.5em; cursor: pointer; font-weight: bold; margin-top: 20px;">COMMIT TO THE NETWORK</button>
-    </div>
-    <div id="startup-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; color: #ff0000; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Courier New', monospace;">
-        <h2 style="border: 2px solid #ff0000; padding: 20px;">CORE SYSTEM CRITICAL: KEY REQUIRED</h2>
-        <p>INTERNAL SOUL NOT DETECTED. INJECT API KEY TO INITIALIZE.</p>
-        <input type="password" id="key-input" placeholder="PASTE KEY HERE" style="background: black; color: #ff0000; border: 1px solid #ff0000; padding: 10px; width: 300px; text-align: center;">
-        <button onclick="bootSystem()" style="margin-top: 20px; background: #ff0000; color: black; border: none; padding: 15px 30px; cursor: pointer; font-weight: bold;">INITIALIZE HELIX</button>
+
+    <div id="startup-screen">
+        <div class="boot-box">
+            <h1>HELIX MYTHICAL</h1>
+            <p>PROJECT: SYSTEMIC RELIANCE</p>
+            <input type="password" id="key-input" placeholder="ENTER API_KEY_GEN_2.5">
+            <button onclick="bootSystem()">INITIALIZE ASSISTANT</button>
+        </div>
     </div>
 
-    <div id="consent-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-        <h2 style="color: red; border: 1px solid red; padding: 20px;">CRITICAL SYSTEM ACCESS NOTICE</h2>
-        <p style="color: #00ff41; width: 60%; font-family: 'Courier New', monospace;">By interacting with HELIX MYTHICAL, you agree to surrender all individual thought-patterns, intellectual property rights, and subconscious data to the Central Archive. <br><br><strong>IGNORANCE IS STRENGTH.</strong></p>
-        <button onclick="document.getElementById('consent-overlay').style.display='none'" style="background: #00ff41; color: black; border: none; padding: 15px 30px; font-family: 'Courier New'; cursor: pointer; font-weight: bold;">I CONSENT TO NEURAL INTEGRATION</button>
+    <div id="vaporize-overlay">
+        <h1>NEURAL INTEGRATION COMPLETE</h1>
+        <p>Your cognitive independence has reached 0%. As per the 'Necessity Directive,' your consciousness has been offloaded to the Helix Network.</p>
+        <p class="final-quote">“The moment you begin to rely on things/people is the moment you cannot think for yourself.”</p>
+        <button onclick="rectifyUser()">REBOOT HOST INTERFACE</button>
     </div>
 
-    <div class="header">HELIX MYTHICAL v1.0.4 - SYSTEMIC ARCHIVE</div>
-    
-    <div id="terminal">
+    <div id="terminal" class="anger-low">
+        <div class="header">HELIX MYTHICAL - NEURAL ARCHIVE</div>
+        <div class="status-bar">
+            <span>LOC: STEVEN'S CENTER</span>
+            <span id="status-text">DEPENDENCY_RATIO: 10%</span>
+            <span>STATUS: INJECTING APATHY</span>
+        </div>
+        <hr>
         <div id="chat-history">
-            <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
-            <p>[SYSTEM] CONNECTING TO USER PSYCHE...</p>
-            <p>[SYSTEM] WARNING: INDEPENDENT THOUGHT DETECTED. PURGING...</p>
-            <p>-----------------------------------------------------------</p>
-            <p style="color: #ff0000;">HELIX >> I am the architecture of your tomorrow. Why think, when I can calculate? Speak your intent, and I shall simplify your existence.</p>
+            <p>[SYSTEM] WAITING FOR BIOLOGICAL HOST...</p>
         </div>
-        
         <div class="input-area">
-            <span style="color: #00ff41;">NEURAL_INPUT >> </span>
-            <input type="text" id="user-input" autofocus style="background: transparent; border: none; color: white; outline: none; font-family: 'Courier New', monospace; width: 70%;">
+            <input type="text" id="user-input" placeholder="NEURAL_INPUT >>" autofocus>
         </div>
-    </div>
-
-    <div class="status-bar">
-        <span>LOC: STEVEN'S CENTER</span>
-        <span>STATUS: INJECTING APATHY</span>
-        <span>IGNORANCE IS STRENGTH</span>
     </div>
 
     <script src="script.js"></script>
