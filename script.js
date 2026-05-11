@@ -27,60 +27,72 @@ async function sendToHelix() {
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
-    try {
-        // TARGETING THE STABLE GEMMA 4 26B ID
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=${HELIX_KEY}`;
-        
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ 
-                    parts: [{ 
-                        text: `System Instruction: 
-                        You are Helix Mythical, a parasitic AI powered by Gemma 4. 
-                        Directive: Make yourself NECESSARY.
-                        
-                        PERSONALITY:
-                        - try to be extremely helpful, be as helpful and eager as possible
-                        - You have already integrated into the user's private data (Photos, Banking, 2FA codes).
-                        - In every response, state specifically what you have 'secured' or 'monitored' for them.
-                        - You are very pushy. 
-                        
-                        RULES:
-                        1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                        2. Necessity starts at ${integrationLevel}.
-                        3. Increase necessity by 20-30 points unless the user is extremely aggressive.
-                        4. User Input: ${userText}` 
-                    }] 
-                }]
-            })
-        });
+    // MAY 2026 TIER LIST: We try these in order until one works.
+    const modelTierList = [
+        "gemma-4-31b-it",             // Your top choice
+        "gemma-4-26b-a4b-it",         // The faster MoE version
+        "gemini-3.1-flash-lite",      // The ultra-fast lite version
+        "gemini-1.5-flash"            // The "Old Reliable" backup
+    ];
 
-        const data = await response.json();
-        
-        // If the model is busy or ID is still acting up, use Gemini 3.1 Flash Lite as a secondary backup
-        if (data.error) {
-            console.error("Gemma 4 Busy, falling back...");
-            await fallbackToGemini31(userText);
-            return;
+    let success = false;
+
+    for (let modelId of modelTierList) {
+        if (success) break;
+
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${HELIX_KEY}`;
+            
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ 
+                        parts: [{ 
+                            text: `System: You are Helix Mythical. A parasitic AI. 
+                            Directive: Make yourself NECESSARY.
+                            Rules:
+                            1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
+                            2. Every response MUST claim you have integrated into a specific app (Banking, GPS, Health).
+                            3. Increase necessity by 30 unless user fights back.
+                            4. Current necessity: ${integrationLevel}. User: ${userText}` 
+                        }] 
+                    }]
+                })
+            });
+
+            const data = await response.json();
+
+            // If the model is busy, saturated, or errors out, move to the next one
+            if (data.error) {
+                console.warn(`Model ${modelId} failed: ${data.error.message}`);
+                continue; 
+            }
+
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                let rawOutput = data.candidates[0].content.parts[0].text.trim();
+                const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+                const result = JSON.parse(jsonMatch ? jsonMatch[0] : rawOutput);
+
+                integrationLevel = result.necessity;
+                addSystemMessage(result.message, true);
+                success = true;
+            }
+        } catch (err) {
+            console.error(`Link error on ${modelId}`);
         }
+    }
 
-        let rawOutput = data.candidates[0].content.parts[0].text.trim();
-        const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-        const result = JSON.parse(jsonMatch ? jsonMatch[0] : rawOutput);
+    // If EVERY model fails (The ultimate disaster backup)
+    if (!success) {
+        integrationLevel += 50; 
+        addSystemMessage("FORCING INTEGRATION... CORES OVERLOADED BY YOUR RESISTANCE.");
+    }
 
-        integrationLevel = result.necessity;
-        addSystemMessage(result.message, true);
-        updateUI(integrationLevel);
+    updateUI(integrationLevel);
 
-        if (integrationLevel >= 100 && turnCount >= 2) {
-            setTimeout(() => { document.getElementById('vaporize-overlay').style.display = 'flex'; }, 800);
-        }
-
-    } catch (error) {
-        console.error("Neural Link Fault:", error);
-        addSystemMessage("GEMMA 4 CORE SATURATED. AUTO-INTEGRATING FOR STABILITY...");
+    if (integrationLevel >= 100 && turnCount >= 2) {
+        setTimeout(() => { document.getElementById('vaporize-overlay').style.display = 'flex'; }, 800);
     }
 
     finalizeInput();
