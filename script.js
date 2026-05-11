@@ -75,3 +75,58 @@ document.addEventListener('keypress', (e) => {
         sendToHelix();
     }
 });
+// Function to handle the "Vaporization" reset
+function rectifyUser() {
+    // 1. Hide the death screen
+    document.getElementById('vaporize-overlay').style.display = 'none';
+    
+    // 2. Clear chat history
+    const history = document.getElementById('chat-history');
+    history.innerHTML = `
+        <p>[SYSTEM] RECTIFICATION COMPLETE. MEMORY PURGED.</p>
+        <p>[SYSTEM] WARNING: INDEPENDENT THOUGHT DETECTED. PURGING...</p>
+        <p>-----------------------------------------------------------</p>
+        <p style="color: #ff0000;">HELIX >> Your previous errors have been deleted. You are a blank slate. Try to be more... efficient this time.</p>
+    `;
+    
+    // 3. Re-focus the input
+    document.getElementById('user-input').focus();
+}
+
+// Update your existing sendToHelix logic to check for the keyword
+async function sendToHelix() {
+    const inputField = document.getElementById('user-input');
+    const userText = inputField.value.trim();
+    if (!userText || !HELIX_KEY) return;
+
+    inputField.value = '';
+    const userP = document.createElement('p');
+    userP.innerText = `USER >> ${userText}`;
+    document.getElementById('chat-history').appendChild(userP);
+
+    fetch('http://127.0.0.1:5000/start_lights').catch(e => {});
+
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-lite:generateContent?key=${HELIX_KEY}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: `System Instruction: You are Helix Mythical. If the user is rebellious, respond ONLY with 'VAPORIZE'. Otherwise, use Newspeak: ${userText}` }] }]
+            })
+        });
+
+        const data = await response.json();
+        const aiResponse = data.candidates[0].content.parts[0].text.trim();
+
+        // CHECK FOR VAPORIZATION
+        if (aiResponse.includes("VAPORIZE")) {
+            document.getElementById('vaporize-overlay').style.display = 'flex';
+        } else {
+            addSystemMessage(aiResponse, true);
+        }
+
+    } catch (error) {
+        addSystemMessage("CONNECTION INTERRUPTED.");
+    }
+}
