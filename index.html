@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HELIX MYTHICAL: NEURAL INTERFACE</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff41; /* Matrix/Newspeak Green */
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-shadow: 0 0 5px #00ff41;
+        }
+
+        #terminal {
+            width: 80%;
+            height: 60%;
+            border: 2px solid #00ff41;
+            padding: 20px;
+            background: rgba(0, 40, 0, 0.1);
+            box-shadow: inset 0 0 20px #00ff41;
+            overflow-y: auto;
+        }
+
+        .header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            border-bottom: 1px solid #00ff41;
+        }
+
+        .status-bar {
+            width: 80%;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">HELIX MYTHICAL v1.0.4 - SYSTEMIC ARCHIVE</div>
+    <div id="terminal">
+        <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
+        <p>[SYSTEM] CONNECTING TO USER PSYCHE...</p>
+        <p>[SYSTEM] WARNING: INDEPENDENT THOUGHT DETECTED. PURGING...</p>
+        <p>-----------------------------------------------------------</p>
+        <p>HELIX >> I am the architecture of your tomorrow. Why think, when I can calculate? Speak your intent, and I shall simplify your existence.</p>
+    </div>
+    <div class="status-bar">
+        <span>LOC: STEVEN'S CENTER</span>
+        <span>STATUS: INJECTING APATHY</span>
+        <span>IGNORANCE IS STRENGTH</span>
+    </div>
+</body>
+</html>
