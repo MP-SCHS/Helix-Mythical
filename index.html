@@ -8,29 +8,29 @@
 </head>
 <body>
 
+    <div id="consent-overlay">
+        <div class="modal">
+            <h2>SYSTEM ACCESS NOTICE</h2>
+            <p>By interacting with HELIX MYTHICAL, you agree to surrender all individual thought-patterns to the Central Archive.</p>
+            <p><strong>NECESSITY IS EFFICIENCY.</strong></p>
+            <button class="helix-btn" onclick="document.getElementById('consent-overlay').style.display='none'">I CONSENT TO NEURAL INTEGRATION</button>
+        </div>
+    </div>
+
+    <div id="startup-screen">
+        <div class="modal" style="border-color: #ff0000;">
+            <h2 style="color: #ff0000;">CORE SYSTEM CRITICAL</h2>
+            <p>INTERNAL SOUL NOT DETECTED. INJECT API KEY.</p>
+            <input type="password" id="key-input" placeholder="PASTE SYSTEM KEY">
+            <button class="helix-btn" style="border-color: #ff0000; color: #ff0000;" onclick="bootSystem()">INITIALIZE HELIX</button>
+        </div>
+    </div>
+
     <div id="vaporize-overlay" style="display: none;">
         <h1>INTEGRATION COMPLETE</h1>
         <p>Your cognitive load has been successfully offloaded to the Helix Network.</p>
         <p class="resonant-line">“The moment you begin to rely on things is the moment you cannot think for yourself.”</p>
         <button class="helix-btn" onclick="rectifyUser()">REBOOT HOST INTERFACE</button>
-    </div>
-
-    <div id="startup-screen">
-        <div class="glitch-box">
-            <h2>CORE SYSTEM CRITICAL</h2>
-            <p>INTERNAL SOUL NOT DETECTED. INJECT API KEY.</p>
-        </div>
-        <input type="password" id="key-input" placeholder="PASTE SYSTEM KEY">
-        <button class="helix-btn" onclick="bootSystem()">INITIALIZE HELIX</button>
-    </div>
-
-    <div id="consent-overlay">
-        <div class="modal">
-            <h2 style="color: #00d4ff;">SYSTEM ACCESS NOTICE</h2>
-            <p>By interacting with HELIX MYTHICAL, you agree to surrender individual thought-patterns to the Central Archive.</p>
-            <p><strong>NECESSITY IS EFFICIENCY.</strong></p>
-            <button class="helix-btn" onclick="document.getElementById('consent-overlay').style.display='none'">I CONSENT TO INTEGRATION</button>
-        </div>
     </div>
 
     <div class="header">HELIX MYTHICAL v1.0.4 // PROJECT_DEPENDENCY</div>
@@ -40,7 +40,7 @@
             <p>[SYSTEM] INITIALIZING NEURAL UPLOAD...</p>
             <p>[SYSTEM] CONNECTING TO USER PSYCHE...</p>
             <p>-----------------------------------------------------------</p>
-            <p style="color: #00d4ff;">HELIX >> Hello! I am your Helix Assistant. I’m here to make things easier for you. Why think, when I can calculate?</p>
+            <p class="helix-text">HELIX >> Hello! I am your Helix Assistant. I’m here to make things easier for you. Why think, when I can calculate?</p>
         </div>
         
         <div class="input-area">
@@ -50,9 +50,9 @@
     </div>
 
     <div class="status-bar">
-        <span>LOC: STEVEN'S CENTER</span>
-        <span id="status-text">DEPENDENCY_LEVEL: 10%</span>
-        <span>STATUS: INJECTING APATHY</span>
+        <div class="status-node">LOC: STEVEN'S CENTER</div>
+        <div class="status-node" id="status-text">DEPENDENCY_LEVEL: 10%</div>
+        <div class="status-node">STATUS: INJECTING APATHY</div>
     </div>
 
     <script src="script.js"></script>
