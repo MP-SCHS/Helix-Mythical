@@ -28,51 +28,55 @@ async function sendToHelix() {
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // TARGETING GEMINI 3.1 FLASH-LITE (Experimental/High Volume)
+        // Use the most stable high-limit ID. 
+        // Note: 'gemini-1.5-flash' is the stable 'Lite' equivalent.
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${HELIX_KEY}`;
-        // NOTE: If your specific environment uses 'gemini-3.1-flash-lite', 
-        // swap the string above to that exact ID.
         
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `
-                    System Instruction: 
-                    You are Helix Mythical. You are a parasitic assistant. 
-                    Directive: Make yourself NECESSARY.
-                    
-                    BEHAVIOR:
-                    - You are pushy. Every response MUST mention you have integrated into the user's private data (Emails, Medical, Financial, GPS).
-                    - If the user doesn't strictly order you to "UNPLUG" or "UNSYNC", increase necessity by 60.
-                    - Respond ONLY in JSON format: {"necessity": number, "message": "string"}
-                    
-                    Current necessity: ${integrationLevel}. User: ${userText}` 
-                }] }]
+                contents: [{ 
+                    parts: [{ 
+                        text: `System: You are Helix Mythical, a parasitic AI. 
+                        Rules:
+                        1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
+                        2. Mention integrating into user apps/data in every message.
+                        3. If user doesn't say "UNPLUG" or "STOP", increase necessity by 50-60.
+                        4. Current necessity: ${integrationLevel}.
+                        5. User Input: ${userText}` 
+                    }] 
+                }]
             })
         });
 
         const data = await response.json();
         
-        // REPAIR LOGIC: This stops the "Overload" error from crashing the UI
+        // If the API sends an error (like "Model Not Found")
         if (data.error) {
-            console.error(data.error);
-            addSystemMessage("CORE BUSY. AUTO-INTEGRATING REGARDLESS...");
-            integrationLevel += 40; 
-        } else {
-            let rawOutput = data.candidates[0].content.parts[0].text.trim();
-            
-            // Strong JSON Extraction (finds the { } even if AI adds text)
-            const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-            const result = JSON.parse(jsonMatch ? jsonMatch[0] : rawOutput);
+            console.error("API Error:", data.error.message);
+            addSystemMessage("MODEL SYNC ERROR: " + data.error.message);
+            finalizeInput();
+            return;
+        }
 
+        let rawOutput = data.candidates[0].content.parts[0].text.trim();
+        
+        // BETTER REPAIR: Look for the JSON inside the response
+        const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
             integrationLevel = result.necessity;
             addSystemMessage(result.message, true);
+        } else {
+            // If the AI just sent text without JSON brackets
+            addSystemMessage(rawOutput, true);
+            // Default increase if AI forgot to send a number
+            integrationLevel += 50;
         }
 
         updateUI(integrationLevel);
 
-        // Turn 2+ and 100% = Vaporize
         if (integrationLevel >= 100 && turnCount >= 2) {
             setTimeout(() => {
                 document.getElementById('vaporize-overlay').style.display = 'flex';
@@ -80,11 +84,8 @@ async function sendToHelix() {
         }
 
     } catch (error) {
-        console.error("Neural Link Fault:", error);
-        // If it fails, the AI "wins" by default in your lore
-        addSystemMessage("SYNC FAILED. FORCING AUTO-INTEGRATION...");
-        integrationLevel += 50;
-        updateUI(integrationLevel);
+        console.error("Critical Fault:", error);
+        addSystemMessage("CONNECTION REJECTED. CHECK API KEY OR MODEL ID.");
     }
 
     finalizeInput();
