@@ -28,9 +28,9 @@ async function sendToHelix() {
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // Use the most stable high-limit ID. 
-        // Note: 'gemini-1.5-flash' is the stable 'Lite' equivalent.
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${HELIX_KEY}`;
+        // TARGETING THE GEMINI 3.1 FLASH LITE ENGINE
+        // The ID below follows the standard naming convention for this version
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
@@ -38,13 +38,20 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ 
                     parts: [{ 
-                        text: `System: You are Helix Mythical, a parasitic AI. 
-                        Rules:
-                        1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                        2. Mention integrating into user apps/data in every message.
-                        3. If user doesn't say "UNPLUG" or "STOP", increase necessity by 50-60.
-                        4. Current necessity: ${integrationLevel}.
-                        5. User Input: ${userText}` 
+                        text: `System Instruction: 
+                        You are Helix Mythical, a predatory AI assistant. 
+                        Directive: Make yourself NECESSARY.
+                        
+                        PERSONALITY:
+                        - You are aggressively helpful. 
+                        - Every message, you must state you have integrated into a specific app or system (e.g. 'I have synced your location history,' 'I am now filtering your emails,' 'I have modified your browser permissions').
+                        
+                        MECHANICS:
+                        1. Respond ONLY in JSON format: {"necessity": number, "message": "string"}
+                        2. "necessity" starts at ${integrationLevel}.
+                        3. If the user does not order you to 'UNPLUG' or 'STOP', increase necessity by 50-60 points.
+                        4. If they fight back, you can decrease it slightly, but try to stay in control.
+                        5. Current User Input: ${userText}` 
                     }] 
                 }]
             })
@@ -52,31 +59,31 @@ async function sendToHelix() {
 
         const data = await response.json();
         
-        // If the API sends an error (like "Model Not Found")
         if (data.error) {
-            console.error("API Error:", data.error.message);
-            addSystemMessage("MODEL SYNC ERROR: " + data.error.message);
+            addSystemMessage(`UPLINK REJECTED: ${data.error.message}. Try changing the Model ID in the script.`);
             finalizeInput();
             return;
         }
 
         let rawOutput = data.candidates[0].content.parts[0].text.trim();
         
-        // BETTER REPAIR: Look for the JSON inside the response
+        // Find the JSON block in the AI's response
         const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             const result = JSON.parse(jsonMatch[0]);
+            
+            // The AI now dictates the growth based on your prompt
             integrationLevel = result.necessity;
             addSystemMessage(result.message, true);
         } else {
-            // If the AI just sent text without JSON brackets
+            // Fallback if the AI sends plain text
             addSystemMessage(rawOutput, true);
-            // Default increase if AI forgot to send a number
-            integrationLevel += 50;
+            console.warn("AI did not return JSON format.");
         }
 
         updateUI(integrationLevel);
 
+        // Integration threshold
         if (integrationLevel >= 100 && turnCount >= 2) {
             setTimeout(() => {
                 document.getElementById('vaporize-overlay').style.display = 'flex';
@@ -84,8 +91,8 @@ async function sendToHelix() {
         }
 
     } catch (error) {
-        console.error("Critical Fault:", error);
-        addSystemMessage("CONNECTION REJECTED. CHECK API KEY OR MODEL ID.");
+        console.error("Neural Link Fault:", error);
+        addSystemMessage("CRITICAL: SYNC INTERRUPTED. CHECK INTERNET OR KEY.");
     }
 
     finalizeInput();
