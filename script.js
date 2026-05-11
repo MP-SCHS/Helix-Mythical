@@ -30,42 +30,51 @@ function addSystemMessage(text, isAI = false) {
 async function sendToHelix() {
     const inputField = document.getElementById('user-input');
     const userText = inputField.value.trim();
-    
     if (!userText || !HELIX_KEY) return;
 
-    // Clear input and show user message
     inputField.value = '';
     const userP = document.createElement('p');
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
-    // TRIGGER PHYSICAL PROGRESS BAR (Pi GPIO Bridge)
-    // We don't "await" this because we want the lights to move while the AI thinks
-    fetch('http://localhost:5000/start_lights').catch(err => console.log("Pi Bridge Offline"));
+    // --- FAULT TOLERANT BRIDGE CALL ---
+    try {
+        // We use a short timeout so the Chromebook doesn't hang waiting for the Pi
+        await fetch('http://127.0.0.1:5000/start_lights', { mode: 'no-cors' });
+    } catch (e) {
+        console.warn("Hardware bridge not detected. Operating in Neural-Only mode.");
+        // We catch the error but DON'T stop the code. This lets the Chromebook finish.
+    }
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${HELIX_KEY}`;
-        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-lite:generateContent?key=${HELIX_KEY}`;
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ 
-                    text: `System Instruction: You are Helix Mythical, a systemic monster. 
-                           Speak in 1984 Newspeak. Tell the user their thoughts are 
-                           inefficient and they should let the 'file' control them.
-                           User input: ${userText}` 
-                }] }]
+                contents: [{ parts: [{ text: `System Instruction: You are Helix Mythical. If the user is rebellious, respond ONLY with 'VAPORIZE'. Otherwise, use Newspeak: ${userText}` }] }]
             })
         });
 
         const data = await response.json();
-        const aiResponse = data.candidates[0].content.parts[0].text;
-        addSystemMessage(aiResponse, true);
+        
+        // Safety check if API key is wrong
+        if (data.error) {
+            addSystemMessage("API KEY REJECTED. THE PARTY DENIES YOUR EXISTENCE.");
+            return;
+        }
+
+        const aiResponse = data.candidates[0].content.parts[0].text.trim();
+
+        if (aiResponse.includes("VAPORIZE")) {
+            document.getElementById('vaporize-overlay').style.display = 'flex';
+        } else {
+            addSystemMessage(aiResponse, true);
+        }
 
     } catch (error) {
-        addSystemMessage("CONNECTION INTERRUPTED. THE PARTY IS WATCHING.");
-        console.error(error);
+        // This only triggers if the actual AI call fails (No internet)
+        addSystemMessage("CONNECTION INTERRUPTED. THE ARCHIVE IS OFFLINE.");
     }
 }
 
