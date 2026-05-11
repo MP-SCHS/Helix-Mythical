@@ -122,7 +122,7 @@ async function sendToHelix() {
 
     // 2. CONTACT THE CORE (gemini-2.5-flash-lite)
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${HELIX_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=`;
         
         const response = await fetch(url, {
             method: "POST",
