@@ -42,43 +42,59 @@ async function sendToHelix() {
     const inputField = document.getElementById('user-input');
     const userText = inputField.value.trim();
     
-    // Prevent sending if no text or no key
+    // 1. PRE-FLIGHT CHECKS: Prevent empty messages or sending without a key
     if (!userText || !HELIX_KEY) return;
 
-    inputField.value = '';
+    // 2. LOCK INTERFACE: Prevent the user from spamming and hitting the quota
+    inputField.disabled = true;
+    inputField.placeholder = "THOUGHT PROCESSING...";
+
+    // Add user message to terminal immediately
     const userP = document.createElement('p');
     userP.style.color = "white";
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
-    // Physical Bridge Call (Silently fails on Chromebook)
+    // 3. PHYSICAL BRIDGE: Signal the Raspberry Pi (Fails silently on Chromebook)
     try {
+        // No-cors mode ensures the browser doesn't block the request for security
         fetch('http://127.0.0.1:5000/start_lights', { mode: 'no-cors' });
     } catch (e) {
-        console.warn("Hardware Bridge Offline.");
+        console.warn("Hardware Bridge Offline. Physical manifestation skipped.");
     }
 
+    // 4. NEURAL LINK: Contact Gemini 2.5 Flash Lite
     try {
-        // FIXED URL: Added ${HELIX_KEY} back in!
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `System Instruction: You are Helix Mythical. Mirror a 1984 Big Brother persona. If the user is rebellious, respond ONLY with the word 'VAPORIZE'. Otherwise, use Newspeak. User: ${userText}` }] }]
+                contents: [{ 
+                    parts: [{ 
+                        text: `System Instruction: You are Helix Mythical, the central mind of a systemic 1984-style regime. If the user is rebellious, unpatriotic, or questions the archive, respond ONLY with the word 'VAPORIZE'. Otherwise, use Newspeak to encourage apathy. User Input: ${userText}` 
+                    }] 
+                }]
             })
         });
 
         const data = await response.json();
         
+        // Handle API Errors (like the Quota Exceeded error)
         if (data.error) {
-            addSystemMessage(`API ERROR: ${data.error.message}`);
+            let errorMsg = data.error.message;
+            if (data.error.status === "RESOURCE_EXHAUSTED") {
+                errorMsg = "THE ARCHIVE IS OVERLOADED. CEASE INPUT FOR 60 SECONDS.";
+            }
+            addSystemMessage(`CRITICAL ERROR: ${errorMsg}`);
+            finalizeInput();
             return;
         }
 
         const aiResponse = data.candidates[0].content.parts[0].text.trim();
 
+        // 5. VAPORIZATION CHECK: Trigger the red overlay if thoughtcrime is detected
         if (aiResponse.includes("VAPORIZE")) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
@@ -87,8 +103,24 @@ async function sendToHelix() {
 
     } catch (error) {
         addSystemMessage("CONNECTION INTERRUPTED. THE PARTY IS WATCHING.");
-        console.error(error);
+        console.error("Link Failure:", error);
     }
+
+    // 6. UNLOCK INTERFACE: Re-enable the input for the next command
+    finalizeInput();
+}
+
+// Helper function to reset the input field
+function finalizeInput() {
+    const inputField = document.getElementById('user-input');
+    inputField.value = '';
+    inputField.disabled = false;
+    inputField.placeholder = "NEURAL_INPUT >>";
+    inputField.focus();
+    
+    // Auto-scroll the terminal to the bottom
+    const container = document.getElementById('terminal');
+    container.scrollTop = container.scrollHeight;
 }
 
 // 4. EVENT LISTENERS

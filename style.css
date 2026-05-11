@@ -81,3 +81,8 @@ body::before {
     padding-top: 10px;
     margin-top: 20px;
 }
+input:disabled {
+    color: #550000; /* Dark red text when locked */
+    cursor: not-allowed;
+    border-bottom: 1px solid #550000;
+}
