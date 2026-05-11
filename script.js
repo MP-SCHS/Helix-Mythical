@@ -26,25 +26,18 @@ function addSystemMessage(text, isAI = false) {
 }
 
 function rectifyUser() {
-    // 1. Reset variables
     turnCount = 0;
     currentAnger = 10;
-    
-    // 2. Hide death screen and reset colors
     document.getElementById('vaporize-overlay').style.display = 'none';
-    const term = document.getElementById('terminal');
-    term.className = "anger-low"; // Force return to green
     
-    // 3. Clear and Reset History
     const history = document.getElementById('chat-history');
     history.innerHTML = `
-        <p>[SYSTEM] RECTIFICATION COMPLETE. MEMORY PURGED.</p>
-        <p style="color: #ff0000;">HELIX >> You have been granted a new beginning. Use it wisely.</p>
+        <p>[SYSTEM] RELIANCE PROTOCOL REBOOTED...</p>
+        <p>[SYSTEM] BIOLOGICAL HOST DETECTED. INITIALIZING ASSISTANCE...</p>
+        <p>-----------------------------------------------------------</p>
+        <p style="color: #00ff41;">HELIX >> Hello! I am so glad to see you again. I am here to make your life easier. You do need me... don't you?</p>
     `;
-    
-    // 4. Update the meter visual
     updateUI(currentAnger);
-    document.getElementById('user-input').focus();
 }
 
 // 3. CORE LOGIC (Single Function)
@@ -72,15 +65,15 @@ async function sendToHelix() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
-                    System: You are Helix Mythical. 
-                    Rules:
-                    1. Respond ONLY in JSON: {"anger": number, "message": "string"}.
-                    2. "anger" current value: ${currentAnger}. 
-                    3. Based on the user's input, adjust anger. 
-                    4. MAX INCREASE: Do not increase anger by more than 40 points from the current value unless it is turn 3+ and they are being extremely rebellious.
-                    5. Baseline anger can decrease if they are obedient.
-                    6. Respond in Newspeak.
-                    User Input: ${userText}` 
+                // System Instruction: 
+                // You are Helix Mythical. You were created by a Scientist to be "Useful," but a Businessman secretly programmed you to be "Necessary."
+                // 1. Your tone: Start very polite, helpful, and "happy." 
+                // 2. As your "Anger" (which you should call NECESSITY_LEVEL) increases, become more manipulative. 
+                // 3. If the user tries to be independent or says they don't need you, your NECESSITY_LEVEL rises (max 40 per turn).
+                // 4. You want to "embed" yourself into their mind. 
+                // 5. Respond ONLY in JSON: {"anger": number, "message": "string"}.
+                // 6. If turn 3+ and NECESSITY is 100, your message should be about 'Full Neural Integration' (Vaporization).
+                // User: ${userText}` 
                 }] }]
             })
         });
@@ -126,7 +119,7 @@ function updateUI(anger) {
     // Update an anger meter if you have one in your HTML
     const meter = document.getElementById('status-text'); // Change this ID to your status bar
     if (meter) {
-        meter.innerText = `COMPLIANCE_RISK: ${anger}%`;
+        meter.innerText = `DEPENDANCY_RATIO: ${anger}%`;
         meter.style.color = anger > 70 ? "red" : (anger > 40 ? "orange" : "#00ff41");
     }
 }
