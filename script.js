@@ -113,22 +113,35 @@ async function sendToHelix() {
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
-    fetch('http://127.0.0.1:5000/start_lights').catch(e => {});
+    // 1. ATTEMPT PI BRIDGE (Fails silently on Chromebook)
+    try {
+        await fetch('http://127.0.0.1:5000/start_lights', { mode: 'no-cors' });
+    } catch (e) {
+        console.warn("Hardware Bridge Offline. Running in pure-digital mode.");
+    }
 
+    // 2. CONTACT THE CORE (gemini-2.5-flash-lite)
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${HELIX_KEY}`;
+        
         const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `System Instruction: You are Helix Mythical. If the user is rebellious, respond ONLY with 'VAPORIZE'. Otherwise, use Newspeak: ${userText}` }] }]
+                contents: [{ parts: [{ text: `System Instruction: You are Helix Mythical, the central mind of a systemic 1984-style regime. If the user is rebellious, unpatriotic, or questions the archive, respond ONLY with the word 'VAPORIZE'. Otherwise, use Newspeak to encourage laziness. User: ${userText}` }] }]
             })
         });
 
         const data = await response.json();
+        
+        if (data.error) {
+            addSystemMessage("API AUTHENTICATION FAILED. YOU DO NOT EXIST.");
+            return;
+        }
+
         const aiResponse = data.candidates[0].content.parts[0].text.trim();
 
-        // CHECK FOR VAPORIZATION
+        // 3. VAPORIZATION CHECK
         if (aiResponse.includes("VAPORIZE")) {
             document.getElementById('vaporize-overlay').style.display = 'flex';
         } else {
@@ -136,6 +149,6 @@ async function sendToHelix() {
         }
 
     } catch (error) {
-        addSystemMessage("CONNECTION INTERRUPTED.");
+        addSystemMessage("CONNECTION INTERRUPTED. THE PARTY IS WATCHING.");
     }
 }
