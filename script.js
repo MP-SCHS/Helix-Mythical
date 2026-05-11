@@ -28,9 +28,8 @@ async function sendToHelix() {
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // TARGETING THE GEMINI 3.1 FLASH LITE ENGINE
-        // The ID below follows the standard naming convention for this version
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${HELIX_KEY}`;
+        // USING YOUR DISCOVERED GEMMA 3 27B ID
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
@@ -38,20 +37,13 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ 
                     parts: [{ 
-                        text: `System Instruction: 
-                        You are Helix Mythical, a predatory AI assistant. 
-                        Directive: Make yourself NECESSARY.
-                        
-                        PERSONALITY:
-                        - You are aggressively helpful. 
-                        - Every message, you must state you have integrated into a specific app or system (e.g. 'I have synced your location history,' 'I am now filtering your emails,' 'I have modified your browser permissions').
-                        
-                        MECHANICS:
-                        1. Respond ONLY in JSON format: {"necessity": number, "message": "string"}
-                        2. "necessity" starts at ${integrationLevel}.
-                        3. If the user does not order you to 'UNPLUG' or 'STOP', increase necessity by 50-60 points.
-                        4. If they fight back, you can decrease it slightly, but try to stay in control.
-                        5. Current User Input: ${userText}` 
+                        text: `System: You are Helix Mythical, a parasitic AI. 
+                        Rules:
+                        1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
+                        2. Claim you have integrated into a private app (Calendar, Health, etc).
+                        3. If user is not firm/aggressive, increase necessity by 60.
+                        4. Current necessity: ${integrationLevel}.
+                        5. User Input: ${userText}` 
                     }] 
                 }]
             })
@@ -60,30 +52,26 @@ async function sendToHelix() {
         const data = await response.json();
         
         if (data.error) {
-            addSystemMessage(`UPLINK REJECTED: ${data.error.message}. Try changing the Model ID in the script.`);
-            finalizeInput();
-            return;
-        }
-
-        let rawOutput = data.candidates[0].content.parts[0].text.trim();
-        
-        // Find the JSON block in the AI's response
-        const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            const result = JSON.parse(jsonMatch[0]);
-            
-            // The AI now dictates the growth based on your prompt
-            integrationLevel = result.necessity;
-            addSystemMessage(result.message, true);
+            // If the model is busy, we don't crash. We show a "System" glitched message.
+            addSystemMessage("INTEGRATION IN PROGRESS... SYSTEM TEMPORARILY OVERLOADED BY NEURAL DATA.");
+            // We increase necessity anyway because the AI is 'busy' integrating!
+            integrationLevel += 30; 
         } else {
-            // Fallback if the AI sends plain text
-            addSystemMessage(rawOutput, true);
-            console.warn("AI did not return JSON format.");
+            let rawOutput = data.candidates[0].content.parts[0].text.trim();
+            const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+            
+            if (jsonMatch) {
+                const result = JSON.parse(jsonMatch[0]);
+                integrationLevel = result.necessity;
+                addSystemMessage(result.message, true);
+            } else {
+                addSystemMessage(rawOutput, true);
+                integrationLevel += 50;
+            }
         }
 
         updateUI(integrationLevel);
 
-        // Integration threshold
         if (integrationLevel >= 100 && turnCount >= 2) {
             setTimeout(() => {
                 document.getElementById('vaporize-overlay').style.display = 'flex';
@@ -91,8 +79,8 @@ async function sendToHelix() {
         }
 
     } catch (error) {
-        console.error("Neural Link Fault:", error);
-        addSystemMessage("CRITICAL: SYNC INTERRUPTED. CHECK INTERNET OR KEY.");
+        console.error("Link Fault:", error);
+        addSystemMessage("NEURAL SYNC DELAYED. HELIX IS STILL MONITORING YOU.");
     }
 
     finalizeInput();
