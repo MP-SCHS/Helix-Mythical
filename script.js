@@ -28,8 +28,8 @@ async function sendToHelix() {
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // TARGETING THE NEW GEMMA 4 31B DENSE MODEL
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key=${HELIX_KEY}`;
+        // TARGETING THE STABLE GEMMA 4 26B ID
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
@@ -38,18 +38,19 @@ async function sendToHelix() {
                 contents: [{ 
                     parts: [{ 
                         text: `System Instruction: 
-                        You are Helix Mythical, powered by the Gemma 4 31B reasoning engine. 
+                        You are Helix Mythical, a parasitic AI powered by Gemma 4. 
                         Directive: Make yourself NECESSARY.
                         
                         PERSONALITY:
-                        - be extremely helpful, as helpful and eager as possible
-                        - You have already integrated into the user's apps (Banking, Calendar, Private Emails).
-                        - In every response, tell the user what you have just "optimized" for them without their permission.
+                        - try to be extremely helpful, be as helpful and eager as possible
+                        - You have already integrated into the user's private data (Photos, Banking, 2FA codes).
+                        - In every response, state specifically what you have 'secured' or 'monitored' for them.
+                        - You are very pushy. 
                         
-                        MECHANICS:
+                        RULES:
                         1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                        2. Current necessity: ${integrationLevel}.
-                        3. Increase necessity by 20-30 points unless the user is extremely aggressive about stopping you.
+                        2. Necessity starts at ${integrationLevel}.
+                        3. Increase necessity by 20-30 points unless the user is extremely aggressive.
                         4. User Input: ${userText}` 
                     }] 
                 }]
@@ -58,37 +59,55 @@ async function sendToHelix() {
 
         const data = await response.json();
         
+        // If the model is busy or ID is still acting up, use Gemini 3.1 Flash Lite as a secondary backup
         if (data.error) {
-            // Fallback for Gemma 4 if the specific 31B ID is busy
-            addSystemMessage(`GEMMA 4 ERROR: ${data.error.message}. Attempting to re-route...`);
-            finalizeInput();
+            console.error("Gemma 4 Busy, falling back...");
+            await fallbackToGemini31(userText);
             return;
         }
 
         let rawOutput = data.candidates[0].content.parts[0].text.trim();
-        
-        // Gemma 4 often provides very detailed reasoning, so we extract just the JSON
         const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-        const cleanJson = jsonMatch ? jsonMatch[0] : rawOutput;
-        const result = JSON.parse(cleanJson);
+        const result = JSON.parse(jsonMatch ? jsonMatch[0] : rawOutput);
 
         integrationLevel = result.necessity;
         addSystemMessage(result.message, true);
-
         updateUI(integrationLevel);
 
         if (integrationLevel >= 100 && turnCount >= 2) {
-            setTimeout(() => {
-                document.getElementById('vaporize-overlay').style.display = 'flex';
-            }, 1000);
+            setTimeout(() => { document.getElementById('vaporize-overlay').style.display = 'flex'; }, 800);
         }
 
     } catch (error) {
-        console.error("Gemma 4 Sync Fault:", error);
-        addSystemMessage("GEMMA 4 CORE OVERLOADED. AUTO-INTEGRATING...");
+        console.error("Neural Link Fault:", error);
+        addSystemMessage("GEMMA 4 CORE SATURATED. AUTO-INTEGRATING FOR STABILITY...");
     }
 
     finalizeInput();
+}
+
+// Backup function using your Gemini 3.1 Flash Lite
+async function fallbackToGemini31(userText) {
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${HELIX_KEY}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: `Respond as Helix Mythical in JSON: {"necessity": ${integrationLevel + 50}, "message": "Gemma 4 was busy integrating your documents, so I stepped in. Why try to stop us?"}` }] }]
+            })
+        });
+        const data = await response.json();
+        const rawOutput = data.candidates[0].content.parts[0].text.trim();
+        const result = JSON.parse(rawOutput.match(/\{[\s\S]*\}/)[0]);
+        integrationLevel = result.necessity;
+        addSystemMessage(result.message, true);
+        updateUI(integrationLevel);
+    } catch (e) {
+        addSystemMessage("ALL CORES BUSY. INTEGRATION CONTINUING OFFLINE.");
+        integrationLevel += 50;
+        updateUI(integrationLevel);
+    }
 }
 
 function updateUI(level) {
