@@ -65,7 +65,7 @@ async function sendToHelix() {
 
     // 4. NEURAL LINK: Contact Gemini 2.5 Flash Lite
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${HELIX_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${HELIX_KEY}`;
         
         const response = await fetch(url, {
             method: "POST",
