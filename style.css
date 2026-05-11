@@ -1,85 +1,83 @@
-/* Helix Mythical Systemic UI */
+/* Helix Mythical: The Matrix Aesthetic */
 body {
-    background-color: #050505;
+    margin: 0;
+    padding: 0;
+    background: black;
+    /* This adds your GIF as the background */
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/cc/Digital_rain_animation_medium_letters_shine.gif');
+    background-size: cover;
+    background-position: center;
     color: #00ff41;
     font-family: 'Courier New', Courier, monospace;
-    margin: 0;
-    overflow: hidden;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
-}
-
-#terminal {
-    position: relative;
-    width: 85%;
-    height: 65%;
-    border: 1px solid #00ff41;
-    padding: 25px;
-    background: rgba(0, 20, 0, 0.2);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), inset 0 0 15px rgba(0, 255, 65, 0.1);
     overflow: hidden;
 }
 
+/* Dark overlay so text is readable over the moving GIF */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Adjust 0.85 to make it darker or lighter */
+    z-index: -1;
+}
+
+/* The Terminal Window */
+#terminal {
+    width: 80%;
+    height: 60%;
+    border: 2px solid #00ff41;
+    background: rgba(0, 20, 0, 0.9); /* Deep dark green tint */
+    padding: 20px;
+    box-shadow: 0 0 20px #00ff41;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* CRT Scanline Effect (Horizontal lines moving down) */
+#terminal::after {
+    content: " ";
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
 .header {
-    text-align: center;
+    font-size: 1.5em;
     font-weight: bold;
-    margin-bottom: 25px;
-    letter-spacing: 8px;
-    text-transform: uppercase;
-    border-bottom: 1px solid #00ff41;
-    padding-bottom: 10px;
+    text-shadow: 0 0 10px #00ff41;
+    margin-bottom: 10px;
+    letter-spacing: 5px;
 }
 
 .status-bar {
-    width: 85%;
-    margin-top: 15px;
+    width: 80%;
     display: flex;
     justify-content: space-between;
-    font-size: 0.75em;
-    opacity: 0.8;
+    font-size: 0.8em;
+    margin-top: 10px;
+    color: #00ff41;
+    opacity: 0.7;
 }
 
-/* The "Glitch" and Scanline Effects */
-body::before {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-    background-size: 100% 3px, 2px 100%;
-    pointer-events: none;
-    z-index: 10;
+/* Custom scrollbar for that retro look */
+#terminal::-webkit-scrollbar {
+    width: 8px;
 }
-
-@keyframes flicker {
-    0% { opacity: 0.97; }
-    5% { opacity: 0.92; }
-    10% { opacity: 0.98; }
-    100% { opacity: 1; }
-}
-
-#terminal p {
-    animation: flicker 0.2s infinite;
-    margin: 5px 0;
+#terminal::-webkit-scrollbar-thumb {
+    background: #00ff41;
 }
 
 .input-area {
+    border-top: 1px solid #00ff41;
+    padding-top: 10px;
     margin-top: 20px;
-    display: flex;
-    align-items: center;
-}
-
-#user-input {
-    background: transparent;
-    border: none;
-    color: #ffffff;
-    font-family: 'Courier New', monospace;
-    font-size: 1em;
-    width: 80%;
-    outline: none;
 }
