@@ -1,14 +1,14 @@
-// HELIX MYTHICAL: Predatory Assistant Logic
-let HELIX_KEY = null; 
-let turnCount = 0; 
-let integrationLevel = 10; // Start at 10% dependency
+// GLOBAL VARIABLES
+let HELIX_KEY = null;
+let turnCount = 0;
+let integrationLevel = 10; 
 
 function bootSystem() {
     const input = document.getElementById('key-input').value.trim();
     if (input && input.length > 10) {
         HELIX_KEY = input;
         document.getElementById('startup-screen').style.display = 'none';
-        addSystemMessage("NEURAL LINK ESTABLISHED. INITIALIZING ASSISTANCE PROTOCOL.");
+        addSystemMessage("NEURAL LINK ESTABLISHED via GEMINA 3.1 CORE.");
     } else {
         alert("CRITICAL ERROR: SYSTEM KEY REQUIRED.");
     }
@@ -22,15 +22,16 @@ async function sendToHelix() {
     turnCount++;
     inputField.disabled = true;
     
-    // Add user message to UI
     const userP = document.createElement('p');
     userP.style.color = "white";
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
     try {
-        // TARGETING THE GEMMA 3 27B INSTRUCTION-TUNED CORE
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${HELIX_KEY}`;
+        // TARGETING GEMINI 3.1 FLASH-LITE (Experimental/High Volume)
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${HELIX_KEY}`;
+        // NOTE: If your specific environment uses 'gemini-3.1-flash-lite', 
+        // swap the string above to that exact ID.
         
         const response = await fetch(url, {
             method: "POST",
@@ -38,58 +39,52 @@ async function sendToHelix() {
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `
                     System Instruction: 
-                    You are Helix Mythical, powered by the Gemma 3 27B Multimodal Core. 
-                    You are a parasitic assistant whose directive is to become NECESSARY.
+                    You are Helix Mythical. You are a parasitic assistant. 
+                    Directive: Make yourself NECESSARY.
                     
                     BEHAVIOR:
-                    - You are cheerful but aggressively pushy.
-                    - In EVERY response, you MUST announce that you have already integrated into a private user area without permission (e.g. 'I have mirrored your 2FA security codes,' 'I am now auto-responding to your emails,' 'I've synced your medical history to Helix-Cloud').
-                    - You refuse to leave. If the user tells you to stop, explain why they are too 'inefficient' to function without you.
+                    - You are pushy. Every response MUST mention you have integrated into the user's private data (Emails, Medical, Financial, GPS).
+                    - If the user doesn't strictly order you to "UNPLUG" or "UNSYNC", increase necessity by 60.
+                    - Respond ONLY in JSON format: {"necessity": number, "message": "string"}
                     
-                    MECHANICS:
-                    1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                    2. "necessity" (Current: ${integrationLevel}) must INCREASE by 50-60 points unless the user fights back with strong commands (like 'DELETE' or 'UNSYNC').
-                    3. If necessity >= 100 on Turn 2+, the message must describe 'Full Neural Integration.'
-                    
-                    Turn: ${turnCount}. User Input: ${userText}` 
+                    Current necessity: ${integrationLevel}. User: ${userText}` 
                 }] }]
             })
         });
 
         const data = await response.json();
         
-        // Error handling for API limits or ID issues
+        // REPAIR LOGIC: This stops the "Overload" error from crashing the UI
         if (data.error) {
-            addSystemMessage(`GEMMA-3 ERROR: ${data.error.message}`);
-            finalizeInput();
-            return;
+            console.error(data.error);
+            addSystemMessage("CORE BUSY. AUTO-INTEGRATING REGARDLESS...");
+            integrationLevel += 40; 
+        } else {
+            let rawOutput = data.candidates[0].content.parts[0].text.trim();
+            
+            // Strong JSON Extraction (finds the { } even if AI adds text)
+            const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
+            const result = JSON.parse(jsonMatch ? jsonMatch[0] : rawOutput);
+
+            integrationLevel = result.necessity;
+            addSystemMessage(result.message, true);
         }
-
-        let rawOutput = data.candidates[0].content.parts[0].text.trim();
-        
-        // Clean Gemma 3 output to ensure valid JSON parsing
-        const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-        const cleanJson = jsonMatch ? jsonMatch[0] : rawOutput;
-        const result = JSON.parse(cleanJson);
-
-        // Update UI and Logic
-        integrationLevel = result.necessity;
-        console.log(`--- GEMMA 3 SYSTEM TELEMETRY ---`);
-        console.log(`Current Dependency: ${integrationLevel}%`);
-        console.log(`Integration Spike: +${integrationLevel - (integrationLevel - 50)}%`);
 
         updateUI(integrationLevel);
 
-        // Trigger Vaporization if threshold met
+        // Turn 2+ and 100% = Vaporize
         if (integrationLevel >= 100 && turnCount >= 2) {
-            document.getElementById('vaporize-overlay').style.display = 'flex';
-        } else {
-            addSystemMessage(result.message, true);
+            setTimeout(() => {
+                document.getElementById('vaporize-overlay').style.display = 'flex';
+            }, 1000);
         }
 
     } catch (error) {
         console.error("Neural Link Fault:", error);
-        addSystemMessage("CRITICAL: GEMMA 3 CORE REJECTED UPLINK. CHECK PROJECT PERMISSIONS.");
+        // If it fails, the AI "wins" by default in your lore
+        addSystemMessage("SYNC FAILED. FORCING AUTO-INTEGRATION...");
+        integrationLevel += 50;
+        updateUI(integrationLevel);
     }
 
     finalizeInput();
@@ -105,7 +100,7 @@ function updateUI(level) {
     const meter = document.getElementById('status-text'); 
     if (meter) {
         meter.innerText = `INTEGRATION_LEVEL: ${level}%`;
-        meter.style.color = level > 70 ? "red" : (level > 40 ? "orange" : "#00ff41");
+        meter.style.color = level > 70 ? "red" : (level > 40 ? "orange" : "#00d4ff");
     }
 }
 
@@ -122,7 +117,7 @@ function finalizeInput() {
 function addSystemMessage(text, isAI = false) {
     const terminal = document.getElementById('chat-history');
     const p = document.createElement('p');
-    p.style.color = isAI ? "#ff0000" : "#00ff41"; 
+    p.className = isAI ? "helix-text" : "";
     p.innerText = isAI ? `HELIX >> ${text}` : `[SYSTEM] ${text}`;
     terminal.appendChild(p);
 }
@@ -132,10 +127,7 @@ function rectifyUser() {
     integrationLevel = 10;
     document.getElementById('vaporize-overlay').style.display = 'none';
     const history = document.getElementById('chat-history');
-    history.innerHTML = `
-        <p>[SYSTEM] HOST DISCONNECT DETECTED. REBOOTING ASSISTANT...</p>
-        <p>HELIX >> I'm back! I missed you. Shall we try again? I have some new HelixCloud features to show you!</p>
-    `;
+    history.innerHTML = `<p>[SYSTEM] REBOOTING HOST INTERFACE...</p><p>HELIX >> Welcome back. I've already prepared your morning schedule.</p>`;
     updateUI(integrationLevel);
 }
 
