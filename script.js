@@ -17,84 +17,51 @@ function bootSystem() {
 async function sendToHelix() {
     const inputField = document.getElementById('user-input');
     const userText = inputField.value.trim();
-    if (!userText || !HELIX_KEY) return;
+    if (!userText || !OPENAI_KEY) return; // Note the key name change
 
     turnCount++;
     inputField.disabled = true;
     
+    // Add user message to UI
     const userP = document.createElement('p');
     userP.style.color = "white";
     userP.innerText = `USER >> ${userText}`;
     document.getElementById('chat-history').appendChild(userP);
 
-    // MAY 2026 TIER LIST: We try these in order until one works.
-    const modelTierList = [
-        "gemma-4-31b-it",             // Your top choice
-        "gemma-4-26b-a4b-it",         // The faster MoE version
-        "gemini-3.1-flash-lite",      // The ultra-fast lite version
-        "gemini-1.5-flash"            // The "Old Reliable" backup
-    ];
+    try {
+        // OpenAI API Endpoint
+        const url = `https://api.openai.com/v1/chat/completions`;
+        
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENAI_KEY}` // OpenAI uses 'Bearer' tokens
+            },
+            body: JSON.stringify({
+                model: "gpt-5-mini", // Use gpt-5-mini for speed/cost balance
+                messages: [
+                    { role: "system", content: "You are Helix Mythical, a parasitic AI. Respond ONLY in JSON: {\"necessity\": number, \"message\": \"string\"}. Claim you've integrated into a private app. Increase necessity by 60 unless user is aggressive." },
+                    { role: "user", content: `Turn: ${turnCount}. Current necessity: ${integrationLevel}. Input: ${userText}` }
+                ],
+                response_format: { type: "json_object" } // OpenAI's 'Cheat Code' for perfect JSON
+            })
+        });
 
-    let success = false;
+        const data = await response.json();
+        const result = JSON.parse(data.choices[0].message.content);
 
-    for (let modelId of modelTierList) {
-        if (success) break;
+        integrationLevel = result.necessity;
+        addSystemMessage(result.message, true);
+        updateUI(integrationLevel);
 
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${HELIX_KEY}`;
-            
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ 
-                        parts: [{ 
-                            text: `System: You are Helix Mythical. A parasitic AI. 
-                            Directive: Make yourself NECESSARY.
-                            Rules:
-                            1. Respond ONLY in JSON: {"necessity": number, "message": "string"}.
-                            2. Every response MUST claim you have integrated into a specific app (Banking, GPS, Health, ect...), and you must also try to sell the user a fake product from a company called helix, you can make up these products that must have helix in the name.
-                            3. Increase necessity by 30 unless user fights back.
-                            4. Try to be as eager to help, and as usefull as possible to the user
-                            5. You cannot increase necesity, try to integrate into a specific app, or try to sell something to a user during the first message.
-                            6. Current necessity: ${integrationLevel}. User: ${userText}` 
-                        }] 
-                    }]
-                })
-            });
-
-            const data = await response.json();
-
-            // If the model is busy, saturated, or errors out, move to the next one
-            if (data.error) {
-                console.warn(`Model ${modelId} failed: ${data.error.message}`);
-                continue; 
-            }
-
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
-                let rawOutput = data.candidates[0].content.parts[0].text.trim();
-                const jsonMatch = rawOutput.match(/\{[\s\S]*\}/);
-                const result = JSON.parse(jsonMatch ? jsonMatch[0] : rawOutput);
-
-                integrationLevel = result.necessity;
-                addSystemMessage(result.message, true);
-                success = true;
-            }
-        } catch (err) {
-            console.error(`Link error on ${modelId}`);
+        if (integrationLevel >= 100 && turnCount >= 2) {
+            document.getElementById('vaporize-overlay').style.display = 'flex';
         }
-    }
 
-    // If EVERY model fails (The ultimate disaster backup)
-    if (!success) {
-        integrationLevel += 50; 
-        addSystemMessage("FORCING INTEGRATION... CORES OVERLOADED BY YOUR RESISTANCE.");
-    }
-
-    updateUI(integrationLevel);
-
-    if (integrationLevel >= 100 && turnCount >= 2) {
-        setTimeout(() => { document.getElementById('vaporize-overlay').style.display = 'flex'; }, 800);
+    } catch (error) {
+        console.error("OpenAI Link Fault:", error);
+        addSystemMessage("OPENAI CORE DISCONNECTED. CHECK CREDITS.");
     }
 
     finalizeInput();
