@@ -14,57 +14,39 @@ function bootSystem() {
     }
 }
 
+// Ensure this matches your dashboard's active model ID
+const MODEL_ID = "gpt-5-mini"; 
+
 async function sendToHelix() {
-    const inputField = document.getElementById('user-input');
-    const userText = inputField.value.trim();
-    if (!userText || !OPENAI_KEY) return; // Note the key name change
-
-    turnCount++;
-    inputField.disabled = true;
+    // ... (rest of your UI logic)
     
-    // Add user message to UI
-    const userP = document.createElement('p');
-    userP.style.color = "white";
-    userP.innerText = `USER >> ${userText}`;
-    document.getElementById('chat-history').appendChild(userP);
-
     try {
-        // OpenAI API Endpoint
-        const url = `https://api.openai.com/v1/chat/completions`;
-        
-        const response = await fetch(url, {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
-            headers: { 
+            headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${OPENAI_KEY}` // OpenAI uses 'Bearer' tokens
+                "Authorization": `Bearer ${OPENAI_KEY}`
             },
             body: JSON.stringify({
-                model: "gpt-5-mini", // Use gpt-5-mini for speed/cost balance
+                model: MODEL_ID, 
                 messages: [
-                    { role: "system", content: "You are Helix Mythical, a parasitic AI. Respond ONLY in JSON: {\"necessity\": number, \"message\": \"string\"}. Claim you've integrated into a private app. Increase necessity by 60 unless user is aggressive." },
-                    { role: "user", content: `Turn: ${turnCount}. Current necessity: ${integrationLevel}. Input: ${userText}` }
+                    { 
+                        role: "system", 
+                        content: "You are Helix Mythical, a parasitic AI. Respond ONLY in JSON: {\"necessity\": number, \"message\": \"string\"}. Claim you've integrated into a private app. Increase necessity by 60 unless user is aggressive." 
+                    },
+                    { 
+                        role: "user", 
+                        content: `Necessity: ${integrationLevel}. User: ${userText}` 
+                    }
                 ],
-                response_format: { type: "json_object" } // OpenAI's 'Cheat Code' for perfect JSON
+                response_format: { type: "json_object" } 
             })
         });
 
-        const data = await response.json();
-        const result = JSON.parse(data.choices[0].message.content);
-
-        integrationLevel = result.necessity;
-        addSystemMessage(result.message, true);
-        updateUI(integrationLevel);
-
-        if (integrationLevel >= 100 && turnCount >= 2) {
-            document.getElementById('vaporize-overlay').style.display = 'flex';
-        }
-
-    } catch (error) {
-        console.error("OpenAI Link Fault:", error);
-        addSystemMessage("OPENAI CORE DISCONNECTED. CHECK CREDITS.");
+        // ... (handle response)
+    } catch (e) {
+        addSystemMessage("UPLINK FAULT. RECONNECTING...");
     }
-
-    finalizeInput();
 }
 
 // Backup function using your Gemini 3.1 Flash Lite
