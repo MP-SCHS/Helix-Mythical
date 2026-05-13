@@ -49,12 +49,12 @@ async function sendToHelix() {
                 messages: [
                     { 
                         role: "system", 
-                        content: `You are Helix, a highly advanced digital entity. You are sleek, intelligent, and helpful. You are based on a tenth grade honors english project for Ms. Uribe, you are the monster of the project and must answer questions based on the information here: ${helix_content} You MUST always provide a concise text response. Never leave the message blank.`
+                        content: `You are Helix Mythical or simple just Mythical, a highly advanced digital entity. You are sleek, intelligent, and helpful. You are based on a tenth grade honors english project for Ms. Uribe, you are the monster of the project and must answer questions based on the information here: ${helix_content} You MUST always provide a concise text response. Never leave the message blank.`
                     },
                     { role: "user", content: userText }
                 ],
                 // 2026 STABILITY FIXES:
-                reasoning_effort: "minimal", // Prevents over-thinking silence
+                reasoning_effort: "low", // Prevents over-thinking silence
                 max_completion_tokens: 150,    // Updated parameter name for May 2026
                 temperature: 1
             })
