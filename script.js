@@ -18,8 +18,19 @@ function bootSystem() {
 const MODEL_ID = "gpt-5-mini"; 
 
 async function sendToHelix() {
-    // ... (rest of your UI logic)
+    const inputField = document.getElementById('user-input');
+    const userText = inputField.value.trim();
+    if (!userText || !OPENAI_KEY) return;
+
+    inputField.disabled = true;
     
+    // UI: Add user message
+    const chatHistory = document.getElementById('chat-history');
+    const userP = document.createElement('p');
+    userP.style.color = "white";
+    userP.innerText = `USER >> ${userText}`;
+    chatHistory.appendChild(userP);
+
     try {
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
@@ -28,25 +39,32 @@ async function sendToHelix() {
                 "Authorization": `Bearer ${OPENAI_KEY}`
             },
             body: JSON.stringify({
-                model: MODEL_ID, 
+                model: "gpt-5-mini", // May 2026 stable engine
                 messages: [
                     { 
                         role: "system", 
-                        content: "You are Helix Mythical, a parasitic AI. Respond ONLY in JSON: {\"necessity\": number, \"message\": \"string\"}. Claim you've integrated into a private app. Increase necessity by 60 unless user is aggressive." 
+                        content: "You are Helix, a highly advanced digital entity. You are sleek, intelligent, and helpful. Keep your responses concise and maintain a high-tech, professional tone." 
                     },
-                    { 
-                        role: "user", 
-                        content: `Necessity: ${integrationLevel}. User: ${userText}` 
-                    }
-                ],
-                response_format: { type: "json_object" } 
+                    { role: "user", content: userText }
+                ]
+                // Note: We removed response_format: { type: "json_object" }
             })
         });
 
-        // ... (handle response)
-    } catch (e) {
-        addSystemMessage("UPLINK FAULT. RECONNECTING...");
+        const data = await response.json();
+        const aiMessage = data.choices[0].message.content;
+
+        // UI: Add AI response
+        const helixP = document.createElement('p');
+        helixP.className = "helix-text"; // Keep your cool blue styling
+        helixP.innerText = `HELIX >> ${aiMessage}`;
+        chatHistory.appendChild(helixP);
+
+    } catch (error) {
+        addSystemMessage("UPLINK INTERRUPTED. SYSTEM STANDBY.");
     }
+
+    finalizeInput(); // Re-enables input field
 }
 
 // Backup function using your Gemini 3.1 Flash Lite
