@@ -49,7 +49,7 @@ async function sendToHelix() {
                 messages: [
                     { 
                         role: "system", 
-                        content: `You are Helix, a highly advanced digital entity. You are sleek, intelligent, and helpful. You MUST always provide a concise text response. Never leave the message blank. Backstory: ${helix_content}`
+                        content: `You are Helix, a highly advanced digital entity. You are sleek, intelligent, and helpful. You are based on a tenth grade honors english project for Ms. Uribe, you are the monster of the project and must answer questions based on the information here: ${helix_content} You MUST always provide a concise text response. Never leave the message blank.`
                     },
                     { role: "user", content: userText }
                 ],
