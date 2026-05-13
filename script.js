@@ -52,7 +52,7 @@ async function sendToHelix() {
                     },
                     { role: "user", content: userText }
                 ],
-                max_tokens: 200 // Keeps responses fast and clean for the UI
+                max_completion_tokens: 200 // Keeps responses fast and clean for the UI
             })
         });
 
