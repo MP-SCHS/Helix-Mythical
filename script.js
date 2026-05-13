@@ -55,7 +55,7 @@ async function sendToHelix() {
                 ],
                 // 2026 STABILITY FIXES:
                 reasoning_effort: "low", // Prevents over-thinking silence
-                max_completion_tokens: 150,    // Updated parameter name for May 2026
+                max_completion_tokens: 300,    // Updated parameter name for May 2026
                 temperature: 1
             })
         });
