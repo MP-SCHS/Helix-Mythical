@@ -24,7 +24,7 @@ async function sendToHelix() {
     const inputField = document.getElementById('user-input');
     const userText = inputField.value.trim();
     
-    // FIX: Changed OPENAI_KEY to HELIX_KEY to match bootSystem
+    // Safety check for keys and input
     if (!userText || !HELIX_KEY) return;
 
     turnCount++;
@@ -42,18 +42,21 @@ async function sendToHelix() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${HELIX_KEY}` // Using the key from bootSystem
+                "Authorization": `Bearer ${HELIX_KEY}` 
             },
             body: JSON.stringify({
-                model: "gpt-5-mini", // May 2026 stable engine
+                model: "gpt-5-mini", 
                 messages: [
                     { 
                         role: "system", 
-                        content: "You are Helix, a highly advanced digital entity. You are sleek, intelligent, and helpful. Keep your responses concise (max 3 sentences) and maintain a professional, high-tech tone. here is a brief explanation of your backstory: ${helix_content}"
+                        content: `You are Helix, a highly advanced digital entity. You are sleek, intelligent, and helpful. You MUST always provide a concise text response. Never leave the message blank. Backstory: ${helix_content}`
                     },
                     { role: "user", content: userText }
                 ],
-                max_completion_tokens: 200 // Keeps responses fast and clean for the UI
+                // 2026 STABILITY FIXES:
+                reasoning_effort: "none", // Prevents over-thinking silence
+                max_output_tokens: 150,    // Updated parameter name for May 2026
+                temperature: 0.7
             })
         });
 
@@ -62,11 +65,16 @@ async function sendToHelix() {
         if (data.error) {
             addSystemMessage(`ACCESS DENIED: ${data.error.message}`);
         } else {
-            const aiMessage = data.choices[0].message.content;
+            // FALLBACK LOGIC: If AI returns blank, provide a default response
+            let aiMessage = data.choices[0].message.content;
+            
+            if (!aiMessage || aiMessage.trim() === "") {
+                aiMessage = "My internal processors are recalibrating. Please repeat your query.";
+            }
 
             // UI: Add AI response
             const helixP = document.createElement('p');
-            helixP.className = "helix-text"; // Uses your glowing blue CSS
+            helixP.className = "helix-text"; 
             helixP.innerText = `HELIX >> ${aiMessage}`;
             chatHistory.appendChild(helixP);
         }
@@ -76,7 +84,7 @@ async function sendToHelix() {
         addSystemMessage("UPLINK INTERRUPTED. SYSTEM STANDBY.");
     }
 
-    finalizeInput(); // Re-enables input field
+    finalizeInput(); 
 }
 
 /**
